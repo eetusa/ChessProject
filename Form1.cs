@@ -82,11 +82,6 @@ namespace ChessProject
 				for (int col = 0; col < b.ColumnCount; col++)
 				{
 					Cell cell = new Cell(row, col);
-					int temp_cell = board.board[row * 8 + col];
-					
-					//System.Diagnostics.Debug.Write(test_cells[temp_cell].ToString());
-
-					//cell.Click += new EventHandler(cell_Click(cell, selected_cell));
 					cell.Click += delegate (object s, EventArgs e) {
 						cell_Click(s, board, b, test_cells);
 					};
@@ -97,8 +92,6 @@ namespace ChessProject
 					ii++;
 
 					cell.SizeMode = PictureBoxSizeMode.StretchImage;
-					//xx
-
 
 				}
 
@@ -124,7 +117,7 @@ namespace ChessProject
 				{
 					board.selected_cell = targetCell.index;
 					requireUpdatedDrawing(targetCell);
-
+					// draw possbile moves -> go through all indexes and check for legality
 				}
             }
             else
@@ -140,7 +133,7 @@ namespace ChessProject
 				{
 					//updateCellDrawing(originCell, targetCell, test_cells);
 					
-
+					
 					board.board[targetCell.index] = board.board[board.selected_cell];
 					board.board[board.selected_cell] = 0;
 					requireUpdatedDrawing(originCell);
@@ -214,14 +207,6 @@ namespace ChessProject
 			cell.updated = false;
         }
 
-		//void updateCellDrawing(Cell originCell, Cell destinationCell, Cell[] test_cells)
-		//{
-		//	resetCellColor(destinationCell);
-		//	resetCellColor(originCell);
-		//	destinationCell.ImageLocation = originCell.ImageLocation;
-		//	originCell.ImageLocation = null;
-		//}
-
 		void resetCellColor(Cell cell)
         {
 			cell.BackColor = !(cell.col % 2 == cell.row % 2) ? Color.FromArgb(118, 150, 85) : Color.FromArgb(238, 238, 212);
@@ -275,8 +260,6 @@ namespace ChessProject
             }
         }
 
-
- 
     }
 	
 }
