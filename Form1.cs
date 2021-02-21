@@ -17,6 +17,7 @@ namespace ChessProject
 		{
 			public static readonly System.Drawing.Size CellSize = new System.Drawing.Size(80, 80);
 			public readonly int row, col, index;
+			public bool updated;
 		
 			
 
@@ -24,8 +25,10 @@ namespace ChessProject
 			{
 				this.row = row; this.col = col;
 				this.Size = CellSize;
-				this.BackColor = (col % 2 == row % 2) ? Color.FromArgb(118, 150, 85) : Color.FromArgb(238, 238, 212);
+				this.BackColor = (col % 2 == row % 2) ? Color.FromArgb(238, 238, 212) : Color.FromArgb(118, 150, 85);
 				this.index = row * 8 + col;
+				this.updated = false;
+
 			}
 			public override string ToString() { return "Cell(" + row + "," + col + ")"; }
 			public Cell returnThis()
@@ -94,26 +97,7 @@ namespace ChessProject
 					ii++;
 
 					cell.SizeMode = PictureBoxSizeMode.StretchImage;
-					if (temp_cell != 0)
-					{
-						if (temp_cell > 0 && temp_cell < 6)
-						{
-							cell.ImageLocation = @"images\1.png";
-							
-
-						}
-						else if (temp_cell > 10 && temp_cell < 16)
-						{
-							cell.ImageLocation = @"images\11.png";
-						}
-						else
-						{
-							cell.ImageLocation = $@"images\{temp_cell}.png";
-
-						}
-						//cell.imagelocation = @"images\1.png";
-						//cell.sizemode = pictureboxsizemode.stretchimage;
-					}
+					//xx
 
 
 				}
@@ -122,15 +106,15 @@ namespace ChessProject
 			b.Padding = new Padding(0);
 			b.Size = new System.Drawing.Size(b.ColumnCount * Cell.CellSize.Width, b.RowCount * Cell.CellSize.Height);
 			printBoard(board);
+			drawBoard(board, test_cells);
 			return b;
 		}
 
 
-		private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] test_cells)
+		private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] cells)
 		{
 
 			Cell targetCell = (Cell)sender;
-			//int cell_contentInt = board.board[targetCell.index];
 			int cell_contentColor = getCellColor(targetCell, board);
 			
 
@@ -139,24 +123,28 @@ namespace ChessProject
 				if (board.turn == cell_contentColor )
 				{
 					board.selected_cell = targetCell.index;
-					setActiveCellColor(targetCell);
-					// draw possible moves?
+					requireUpdatedDrawing(targetCell);
+
 				}
             }
             else
             {
-				Cell originCell = test_cells[board.selected_cell];
+				Cell originCell = cells[board.selected_cell];
 
 				if (originCell == targetCell)
                 {
 					board.selected_cell = -1;
-					resetCellColor(originCell);
+					//resetCellColor(originCell);
+					requireUpdatedDrawing(originCell);
                 } else if (legalMove(board, originCell, targetCell))
 				{
-					updateCellDrawing(originCell, targetCell, test_cells);
+					//updateCellDrawing(originCell, targetCell, test_cells);
+					
 
 					board.board[targetCell.index] = board.board[board.selected_cell];
 					board.board[board.selected_cell] = 0;
+					requireUpdatedDrawing(originCell);
+					requireUpdatedDrawing(targetCell);
 					board.selected_cell = -1;
 
 					if (board.turn == 0) { board.turn = 1; turn_label.Text = "Black"; }
@@ -169,25 +157,79 @@ namespace ChessProject
 
 
             }
+			drawBoard(board, cells);
 
 		}
 
-		void updateCellDrawing(Cell originCell, Cell destinationCell, Cell[] test_cells)
-		{
-			resetCellColor(destinationCell);
-			resetCellColor(originCell);
-			destinationCell.ImageLocation = originCell.ImageLocation;
-			originCell.ImageLocation = null;
-		}
+		void drawBoard(Board board, Cell[] cells)
+        {
+			for (int i = 0; i < board.board.Length; i++)
+            {
+				drawCell(board, cells[i]);
+            }
+        }
+
+		void drawCell(Board board, Cell cell)
+        {
+			int index = cell.index;
+			int cellValue = board.board[index];
+
+			if (!cell.updated)
+            {
+				if (board.selected_cell == index)
+                {
+					setActiveCellColor(cell);
+                } else
+                {
+					resetCellColor(cell);
+                }
+				if (board.board[index] > 0)
+                {
+					
+					if (cellValue > 0 && cellValue < 6)
+					{
+						cell.ImageLocation = @"images\1.png";
+
+
+					}
+					else if (cellValue > 10 && cellValue < 16)
+					{
+						cell.ImageLocation = @"images\11.png";
+					}
+					else
+					{
+						cell.ImageLocation = $@"images\{cellValue}.png";
+
+					}
+				} else
+                {
+					cell.ImageLocation = null;
+                }
+				cell.updated = true;
+            }
+        }
+
+		void requireUpdatedDrawing (Cell cell)
+        {
+			cell.updated = false;
+        }
+
+		//void updateCellDrawing(Cell originCell, Cell destinationCell, Cell[] test_cells)
+		//{
+		//	resetCellColor(destinationCell);
+		//	resetCellColor(originCell);
+		//	destinationCell.ImageLocation = originCell.ImageLocation;
+		//	originCell.ImageLocation = null;
+		//}
 
 		void resetCellColor(Cell cell)
         {
-			cell.BackColor = (cell.col % 2 == cell.row % 2) ? Color.FromArgb(118, 150, 85) : Color.FromArgb(238, 238, 212);
+			cell.BackColor = !(cell.col % 2 == cell.row % 2) ? Color.FromArgb(118, 150, 85) : Color.FromArgb(238, 238, 212);
 		}
 
 		void setActiveCellColor(Cell cell)
         {
-			cell.BackColor = (cell.col % 2 == cell.row % 2) ? Color.FromArgb(88, 133, 64) : Color.FromArgb(213, 213, 149);
+			cell.BackColor = !(cell.col % 2 == cell.row % 2) ? Color.FromArgb(88, 133, 64) : Color.FromArgb(213, 213, 149);
 		}
 
 		bool legalMove(Board board, Cell originCell, Cell targetCell)
