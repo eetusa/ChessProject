@@ -132,7 +132,7 @@ namespace ChessProject
 					board.selected_cell = -1; // reset selection to none
 					board.possibleMoves = resetPossibleMoves(board, cells);
 					requireUpdatedDrawing(originCell);
-                } else if (board.possibleMoves.Contains(targetCell.index))
+                } else if (board.possibleMoves.Contains(targetCell.index)) // check against whole possible moves
 				{
 					board.possibleMoves = resetPossibleMoves(board, cells);
 					board.board[targetCell.index] = board.board[board.selected_cell];
@@ -423,6 +423,52 @@ namespace ChessProject
 			return false;
 		}
 
+		int[][] getAllPossibleMoves(int[] board)
+        {
+			int[][] superArray = new int[64][];
+			int[] tempArray = new int[28];
+			for (int i = 0; i < superArray.Length; i++)
+            {
+				if  (getCellColor(board[i], board) != -1)
+                {
+					tempArray = getPossibleMovesLow(board, i);
+					if (tempArray[0] != -1)
+                    {
+						superArray[i] = new int[28];
+						Array.Copy(tempArray, superArray[i], 28);
+					}
+                }
+            }
+			return superArray;
+        }
+
+		int[] getPossibleMovesLow(int[] board, int originCell)
+		{
+			int[] moveArray =
+			{
+				-1, -1, -1, -1,-1, -1, -1, -1, -1,-1,
+				-1, -1, -1, -1,-1, -1, -1, -1, -1,-1,
+				-1, -1, -1, -1,-1, -1, -1, -1
+			};
+
+
+				int temp = 0;
+				for (int i = 0; i < board.Length; i++)
+				{
+
+					if (legalMoveNew(board, originCell, i, 0))
+					{
+						moveArray[temp] = i;
+						temp++;
+					}
+
+				}
+				//System.Diagnostics.Debug.Write("\n" + "possible moves length: " + temp + "\n");
+			
+			printArray(moveArray, printBoxDebug);
+			return moveArray;
+		}
+
 		int[] getPossibleMoves(Board board, Cell[] cells, Cell originCell)
         {
 			int[] moveArray =
@@ -452,36 +498,6 @@ namespace ChessProject
 			return moveArray;
         }
 
-		int[] getPossibleMovesForThreat(Board board, Cell[] cells, Cell originCell)
-		{
-			int[] moveArray =
-			{
-				-1, -1, -1, -1,-1, -1, -1, -1, -1,-1,
-				-1, -1, -1, -1,-1, -1, -1, -1, -1,-1,
-				-1, -1, -1, -1,-1, -1, -1, -1
-			};
-
-			if (board.selected_cell != -1)
-			{
-				int temp = 0;
-				for (int i = 0; i < board.board.Length; i++)
-				{
-					if (i != originCell.index)
-					{
-						if (legalMoveNew(board.board, originCell.index, i, 0))
-						{
-							System.Diagnostics.Debug.Write("\n ** Cell: " + cells[i] + " i: " + temp + "** \n");
-							moveArray[temp] = i;
-							requireUpdatedDrawing(cells[i]);
-							temp++;
-						}
-					}
-				}
-				//System.Diagnostics.Debug.Write("\n" + "possible moves length: " + temp + "\n");
-			}
-			
-			return moveArray;
-		}
 
 		int[] resetPossibleMoves(Board board, Cell[] cells)
         {
@@ -491,48 +507,9 @@ namespace ChessProject
 				-1, -1, -1, -1,-1, -1, -1, -1, -1,-1,
 				-1, -1, -1, -1,-1, -1, -1, -1
 			};
-			//for (int i = 0; i < board.possibleMoves.Length; i++)
-   //         {
-			//	if (board.possibleMoves[i] != -1) requireUpdatedDrawing(cells[i]);
-			//	board.possibleMoves[i] = -1;
-   //         }
+
 			return moveArray;
 		}
-
-		//bool cellThreatened(Board board, Cell targetCell, Cell originCell, Cell[] cells)
-  //      {
-		//	int[] tempArray = new int[] {
-		//		-1, -1, -1, -1,-1, -1, -1, -1, -1,-1,
-		//		-1, -1, -1, -1,-1, -1, -1, -1, -1,-1,
-		//		-1, -1, -1, -1,-1, -1, -1, -1
-		//	};
-		//	int cellColor = getCellColor(originCell, board);
-
-		//	for (int i = 0; i < board.board.Length; i++)
-  //          {
-		//		int tempColor = getCellColor(cells[i], board);
-		//		if (i != targetCell.index && i != originCell.index) { 
-		//			if (cellColor != tempColor && tempColor != -1)
-		//			{
-		//				//System.Diagnostics.Debug.Write(" || cellcolor: " + cellColor + " tempcolor: " + tempColor);
-		//				 //tempArray = getPossibleMovesForThreat(board, cells, cells[i]);
-		//				if (legalMove(board, cells[i], originCell, cells, 2)) return true;
-		//				//if (tempArray.Contains(targetCell.index))
-		//				//{
-		//				//	System.Diagnostics.Debug.Write("**  "+cells[i]+" ** "+ tempColor + " " +cellColor  +" \n");
-		//				//	for (int j = 0; j < tempArray.Length; j++)
-		//				//	{
-		//				//		System.Diagnostics.Debug.Write(" " + tempArray[j]);
-		//				//	}
-		//				//	System.Diagnostics.Debug.Write(" ** \n");
-		//				//	return true;
-		//				//}
-		//			}
-		//		}
-
-		//	}
-		//	return false;
-  //      }
 
 		bool kingThreatened (int[] board, int originCell, int targetCell)
         {
@@ -576,6 +553,8 @@ namespace ChessProject
 			return false;
         }
 
+		// to fix: pawn changes rank, rook castles
+		// get all possible moves after movement. compare shit against that until moved
 		bool legalMoveNew(int[] board, int originCell, int targetCell, int type)
         {
 			int piece = board[originCell];
@@ -583,6 +562,35 @@ namespace ChessProject
 			bool targetOccupiedByEnemy = ((getCellColor(originCell, board) != getCellColor(targetCell, board)) && getCellColor(targetCell, board) != -1) ? true : false;
 			int movement = originCell - targetCell;
 
+			// knight
+			if (piece == 7 || piece == 17)
+            {
+				int rowdif = Math.Abs((originCell / 8) - (targetCell / 8));
+				if ((movement == -17 || movement == -15 || movement == 17 || movement == 15) && rowdif == 2)
+                {
+					if (targetOccupiedByEnemy || !targetOccupied)
+					{
+						if (type != 1)
+						{
+							return !kingThreatened(board, originCell, targetCell);
+						}
+
+						return true;
+					}
+				}
+				if ( (movement == -6 || movement == -10 || movement == 6 || movement == 10) && rowdif == 1)
+                {
+					if (targetOccupiedByEnemy || !targetOccupied)
+					{
+						if (type != 1)
+						{
+							return !kingThreatened(board, originCell, targetCell);
+						}
+
+						return true;
+					}
+				}
+			}
 
 			// king
 			if (piece == 10 || piece == 20)
@@ -791,114 +799,10 @@ namespace ChessProject
 				}
 			}
 
+
 			return false;
         }
 
-		//bool legalMove(Board board, Cell originCell, Cell targetCell, Cell[] cells, int callType)
-  //      {
-		//	int piece = board.board[originCell.index];
-		//	bool targetOccupied = (board.board[targetCell.index] != 0) ? true : false;
-		//	bool targetOccupiedByEnemy = (( getCellColor(originCell, board) != getCellColor(targetCell, board) ) && (getCellColor(targetCell, board) !=-1) ) ? true : false;
-		//	int origin = originCell.index;
-		//	int target = targetCell.index;
-		//	int movement = origin - target;
-
-		//	// king
-		//	if (piece == 10 || piece == 20)
-  //          {
-		//		int[] temp = { 8, -8, 7, -7, 9, -9 };
-		//		int rowdif = Math.Abs((origin / 8) - (target / 8));
-		//		if (movement == 1 || movement == -1)
-  //              {
-		//			if (rowdif != 0)
-  //                  {
-		//				return false;
-  //                  }
-		//			if (targetOccupiedByEnemy || !targetOccupied)
-  //                  {
-		//				//return !kingThreatened(board, targetCell, originCell, cells);
-		//				if (callType!=2) return !kingThreatened(board, targetCell, originCell, cells);
-		//				return true;
-  //                  }
-  //              }
-		//		if (temp.Contains(movement) && rowdif == 1)
-  //              {
-		//			if (targetOccupiedByEnemy || !targetOccupied)
-		//			{
-		//				if (callType != 2) return !kingThreatened(board, targetCell, originCell, cells);
-		//				return true;
-		//			}
-		//		}
-  //          }
-
-		//	// bishop
-		//	if (piece == 6 || piece == 16)
-		//	{
-		//		if (checkStraightMovement(board, origin, target, -7)) return true;
-		//		if (checkStraightMovement(board, origin, target, -9)) return true;
-		//		if (checkStraightMovement(board, origin, target, 7)) return true;
-		//		if (checkStraightMovement(board, origin, target, 9)) return true;
-
-		//	}
-
-		//	// rook
-		//	if (piece == 8 || piece == 18)
-  //          {
-		//		if (checkStraightMovement(board, origin, target, -1)) return true;
-		//		if (checkStraightMovement(board, origin, target, -8)) return true;
-		//		if (checkStraightMovement(board, origin, target, 1)) return true;
-		//		if (checkStraightMovement(board, origin, target, 8)) return true;
-		//	}
-
-		//	// queen
-		//	if (piece == 9 || piece == 19)
-  //          {
-		//		if (checkStraightMovement(board, origin, target, -7)) return true;
-		//		if (checkStraightMovement(board, origin, target, -9)) return true;
-		//		if (checkStraightMovement(board, origin, target, 7)) return true;
-		//		if (checkStraightMovement(board, origin, target, 9)) return true;
-		//		if (checkStraightMovement(board, origin, target, -1)) return true;
-		//		if (checkStraightMovement(board, origin, target, -8)) return true;
-		//		if (checkStraightMovement(board, origin, target, 1)) return true;
-		//		if (checkStraightMovement(board, origin, target, 8)) return true;
-		//	}
-
-		//	// white pawn
-		//	if (piece == 1)
-  //          {
-		//		if (movement == 8 && !targetOccupied)
-  //              {
-		//			return true;
-  //              } else if (movement == 16 && originCell.row == 6 && !targetOccupied && callType!=2)
-  //              {
-		//			return true;
-  //              } else if ((movement == 7 || movement == 9) && targetOccupiedByEnemy || callType == 2)
-  //              {
-		//			return true;
-  //              }
-  //          }
-
-		//	// black pawn
-		//	if (piece == 11)
-		//	{
-		//		if (movement == -8 && !targetOccupied)
-		//		{
-		//			return true;
-		//		}
-		//		else if (movement == -16 && originCell.row == 1 && !targetOccupied && callType != 2)
-		//		{
-		//			return true;
-		//		}
-		//		else if ((movement == -7 || movement == -9) && (targetOccupiedByEnemy || callType == 2))
-		//		{
-		//			return true;
-		//		}
-		//	}
-
-
-
-		//	return false;
-  //      }
 
 		int getCellColor(Cell cell, Board board)
         {
