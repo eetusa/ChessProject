@@ -32,6 +32,8 @@ namespace ChessProject
             this.turn_label = new System.Windows.Forms.Label();
             this.boardIntCont = new System.Windows.Forms.TextBox();
             this.printBoxDebug = new System.Windows.Forms.TextBox();
+            this.whiteAIButton = new System.Windows.Forms.CheckBox();
+            this.blackAIButton = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // turn_label
@@ -62,14 +64,36 @@ namespace ChessProject
             this.printBoxDebug.Multiline = true;
             this.printBoxDebug.Name = "printBoxDebug";
             this.printBoxDebug.ReadOnly = true;
-            this.printBoxDebug.Size = new System.Drawing.Size(130, 109);
+            this.printBoxDebug.Size = new System.Drawing.Size(130, 176);
             this.printBoxDebug.TabIndex = 2;
+            // 
+            // whiteAIButton
+            // 
+            this.whiteAIButton.AutoSize = true;
+            this.whiteAIButton.Location = new System.Drawing.Point(901, 374);
+            this.whiteAIButton.Name = "whiteAIButton";
+            this.whiteAIButton.Size = new System.Drawing.Size(71, 19);
+            this.whiteAIButton.TabIndex = 3;
+            this.whiteAIButton.Text = "White AI";
+            this.whiteAIButton.UseVisualStyleBackColor = true;
+            // 
+            // blackAIButton
+            // 
+            this.blackAIButton.AutoSize = true;
+            this.blackAIButton.Location = new System.Drawing.Point(901, 399);
+            this.blackAIButton.Name = "blackAIButton";
+            this.blackAIButton.Size = new System.Drawing.Size(68, 19);
+            this.blackAIButton.TabIndex = 4;
+            this.blackAIButton.Text = "Black AI";
+            this.blackAIButton.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(984, 961);
+            this.Controls.Add(this.blackAIButton);
+            this.Controls.Add(this.whiteAIButton);
             this.Controls.Add(this.printBoxDebug);
             this.Controls.Add(this.boardIntCont);
             this.Controls.Add(this.turn_label);
@@ -87,6 +111,8 @@ namespace ChessProject
         private System.Windows.Forms.Label turn_label;
         private System.Windows.Forms.TextBox boardIntCont;
         private System.Windows.Forms.TextBox printBoxDebug;
+        private System.Windows.Forms.CheckBox whiteAIButton;
+        private System.Windows.Forms.CheckBox blackAIButton;
     }
 }
 
