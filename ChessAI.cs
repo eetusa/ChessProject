@@ -7,6 +7,7 @@ namespace ChessProject
     public static class ChessAI
     {
 
+
         public static int[] AITurn(Board Cboard)
         {
             int turn = Cboard.turn;
