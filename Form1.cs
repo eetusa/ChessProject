@@ -8,12 +8,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+
 namespace ChessProject
 {
     public partial class Form1 : Form
     {
 		private TableLayoutPanel cells;
-		class Cell : PictureBox
+		public class Cell : PictureBox
 		{
 			public static readonly System.Drawing.Size CellSize = new System.Drawing.Size(80, 80);
 			public readonly int row, col, index;
@@ -38,6 +39,50 @@ namespace ChessProject
 		}
 
 
+		private TableLayoutPanel GetBoard(Board board, Cell[] test_cells)
+		{
+			TableLayoutPanel b = new TableLayoutPanel();
+			b.ColumnCount = 8;
+			b.RowCount = 8;
+			turn_label.Text = board.turn == 0 ? "White" : "Black";
+
+			for (int i = 0; i < b.ColumnCount; i++)
+			{
+				b.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, Cell.CellSize.Width));
+			}
+
+			for (int i = 0; i < b.RowCount; i++)
+			{
+				b.RowStyles.Add(new RowStyle(SizeType.Absolute, Cell.CellSize.Height));
+			}
+			int ii = 0;
+
+			for (int row = 0; row < b.RowCount; row++)
+			{
+				for (int col = 0; col < b.ColumnCount; col++)
+				{
+					Cell cell = new Cell(row, col);
+					cell.Click += delegate (object s, EventArgs e) {
+						cell_Click(s, board, b, test_cells);
+					};
+
+
+					b.Controls.Add(cell, col, row);
+					test_cells[ii] = cell;
+					ii++;
+
+					cell.SizeMode = PictureBoxSizeMode.StretchImage;
+
+				}
+
+			}
+			b.Padding = new Padding(0);
+			b.Size = new System.Drawing.Size(b.ColumnCount * Cell.CellSize.Width, b.RowCount * Cell.CellSize.Height);
+
+			return b;
+		}
+
+
 
 		public Form1()
         {
@@ -51,6 +96,7 @@ namespace ChessProject
 			Cell[] cellArr = new Cell[64];
 			cells = GetBoard(board, cellArr);
 			this.Controls.Add(cells);
+
 			startNewGame(board, cellArr);
 			newgame_button.Click += (sender, EventArgs) =>
 			{
@@ -72,58 +118,11 @@ namespace ChessProject
 
 		}
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
-
-		
-
-		private TableLayoutPanel GetBoard(Board board, Cell[] test_cells)
-		{
-			TableLayoutPanel b = new TableLayoutPanel();
-			b.ColumnCount = 8;
-			b.RowCount = 8;
-			turn_label.Text = board.turn == 0 ? "White" : "Black";
-
-			for (int i = 0; i < b.ColumnCount; i++)
-			{
-				b.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, Cell.CellSize.Width));
-			}
-
-			for (int i = 0; i < b.RowCount; i++)
-			{
-				b.RowStyles.Add(new RowStyle(SizeType.Absolute, Cell.CellSize.Height));
-			}
-			int ii = 0;
-			
-			for (int row = 0; row < b.RowCount; row++)
-			{
-				for (int col = 0; col < b.ColumnCount; col++)
-				{
-					Cell cell = new Cell(row, col);
-					cell.Click += delegate (object s, EventArgs e) {
-						cell_Click(s, board, b, test_cells);
-					};
-					
-					
-					b.Controls.Add(cell, col, row);
-					test_cells[ii] = cell;
-					ii++;
-
-					cell.SizeMode = PictureBoxSizeMode.StretchImage;
-
-				}
-
-			}
-			b.Padding = new Padding(0);
-			b.Size = new System.Drawing.Size(b.ColumnCount * Cell.CellSize.Width, b.RowCount * Cell.CellSize.Height);
-
-			return b;
-		}
 
 
-		private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] cells)
+
+
+private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] cells)
 		{
 			System.Diagnostics.Debug.Write(board.AI_BlackON + " " + board.AI_WhiteON + " " + board.turn);
 			if ((board.AI_WhiteON && board.turn%2 == 0) || (board.AI_BlackON && board.turn%2==1 ))
@@ -149,7 +148,7 @@ namespace ChessProject
 
 					} else if (board.allPossibleMoves[originCell.index] != null && board.allPossibleMoves[originCell.index].Contains(targetCell.index)) 
 					{
-						doTurn(board, cells, originCell, targetCell);
+						doTurn(board, cells, originCell, targetCell, false);
 						if (board.allPossibleMoves == null)
 						{
 							System.Diagnostics.Debug.Write("\n ** IT'S A CHECKMATE, MATE ** \n");
@@ -190,7 +189,7 @@ namespace ChessProject
 			printArray(board.possibleMoves, printBoxDebug);
 		}
 
-		void doTurn(Board board, Cell[] cells, Cell originCell, Cell targetCell) 
+		void doTurn(Board board, Cell[] cells, Cell originCell, Cell targetCell, bool aiTurn) 
         {
 			if (board.allPossibleMoves == null)
 			{
@@ -204,6 +203,8 @@ namespace ChessProject
 			requireUpdatedDrawing(originCell);
 			requireUpdatedDrawing(targetCell);
 			board.selected_cell = -1;
+			ChessAI.checkPawnUpdate(board.board, aiTurn);
+            
 
 			// change turn, draw all and get new moves
 			if (board.turn % 2 == 0) { board.turn += 1; turn_label.Text = "Black"; }
@@ -227,7 +228,7 @@ namespace ChessProject
 			wait(10);
 			if (result != null)
 			{
-				doTurn(board, cells, cells[result[0]], cells[result[1]]);
+				doTurn(board, cells, cells[result[0]], cells[result[1]], true);
 			}
 			else
 			{
@@ -288,7 +289,7 @@ namespace ChessProject
             }
         }
 
-		void requireUpdatedDrawing (Cell cell)
+		public void requireUpdatedDrawing (Cell cell)
         {
 			cell.updated = false;
         }
@@ -337,7 +338,6 @@ namespace ChessProject
 			board.AI_WhiteON = whiteAIButton.Checked;
 			board.AI_BlackON = blackAIButton.Checked;
 
-			System.Diagnostics.Debug.Write(board.AI_WhiteON + "<-- white, black --> " + board.AI_BlackON + "\n");
 		}
 
 		int[] resetPossibleMoves(Board board, Cell[] cells)
@@ -367,8 +367,6 @@ namespace ChessProject
 			return -1;
         }
 
-
-		// tai label ja \n
 		void printBoard(Board board)
         {
 			boardIntCont.Text = "";
@@ -431,31 +429,27 @@ namespace ChessProject
 			}
 		}
 
-
-	 
-	
-
 	void newgame_Click(Board board, Cell[] cells)
 	{
 			startNewGame(board, cells);
 	}
 
-		void startNewGame(Board board, Cell[] cells)
-        {
+	void startNewGame(Board board, Cell[] cells)
+    {
 
-			board.initializeBoard();
-			foreach (Cell cell in cells)
-			{
-				requireUpdatedDrawing(cell);
-			}
-
-			board.allPossibleMoves = ChessAI.getAllPossibleMoves(board.board, 0);
-			blackAIButton.Checked = board.AI_BlackON;
-			whiteAIButton.Checked = board.AI_WhiteON;
-			turn_label.Text = (board.turn % 2 == 0) ? "White" : "Black";
-			drawBoard(board, cells);
-			printBoard(board);
+		board.initializeBoard();
+		foreach (Cell cell in cells)
+		{
+			requireUpdatedDrawing(cell);
 		}
+
+		board.allPossibleMoves = ChessAI.getAllPossibleMoves(board.board, 0);
+		blackAIButton.Checked = board.AI_BlackON;
+		whiteAIButton.Checked = board.AI_WhiteON;
+		turn_label.Text = (board.turn % 2 == 0) ? "White" : "Black";
+		drawBoard(board, cells);
+		printBoard(board);
+	}
 
 
 }

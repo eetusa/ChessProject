@@ -111,7 +111,6 @@ namespace ChessProject
             this.Controls.Add(this.turn_label);
             this.Name = "Form1";
             this.Text = "ö";
-            this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

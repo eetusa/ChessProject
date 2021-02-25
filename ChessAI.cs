@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
+
 namespace ChessProject
 {
     public static class ChessAI
@@ -117,14 +118,91 @@ namespace ChessProject
             return moveArray;
         }
 
-		static int[] checkPawnUpdate(int[] board)
+		public static bool checkPawnUpdate(int[] board, bool aiTurn)
         {
+			bool result2 = false;
 			for (int i = 0; i < 8; i++)
             {
-				//if (board[i] == 0) ;
+				if (board[i] == 1)
+                {
+					result2 = true;
+					if (!aiTurn) {
+						using (Form3 form = new Form3())
+						{
+
+							var result = form.ShowDialog();
+							if (result == System.Windows.Forms.DialogResult.OK)
+							{
+								int returnValue = form.returnValue;            //values preserved after close
+								if (returnValue == 6)
+								{
+									board[i] = 6;
+								}
+								if (returnValue == 7)
+								{
+									board[i] = 7;
+								}
+								if (returnValue == 8)
+								{
+									board[i] = 8;
+								}
+								if (returnValue == 9)
+								{
+									board[i] = 9;
+								}
+
+							}
+						}
+					} else
+                    {
+						board[i] = 9;
+                    }
+				}
             }
-			return null;
+			for (int i = 56; i < 64; i++)
+			{
+				if (board[i] == 11)
+				{
+					result2 = true;
+					if (!aiTurn)
+					{
+						using (Form3 form = new Form3())
+						{
+
+							var result = form.ShowDialog();
+							if (result == System.Windows.Forms.DialogResult.OK)
+							{
+								int returnValue = form.returnValue;            //values preserved after close
+								if (returnValue == 6)
+								{
+									board[i] = 16;
+								}
+								if (returnValue == 7)
+								{
+									board[i] = 17;
+								}
+								if (returnValue == 8)
+								{
+									board[i] = 18;
+								}
+								if (returnValue == 9)
+								{
+									board[i] = 19;
+								}
+
+							}
+						}
+                    }
+                    else
+                    {
+						board[i] = 19;
+                    }
+				}
+			}
+			return result2;
         }
+
+
         static bool kingThreatened(int[] board, int originCell, int targetCell)
         {
             int[] tempArr = new int[64];
