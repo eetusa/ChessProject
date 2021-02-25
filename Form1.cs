@@ -48,13 +48,25 @@ namespace ChessProject
 			//WindowState = FormWindowState.Maximized;
 			//this.Size = new Size(1300, 1300);
 			InitializeComponent();
-			Cell[] test_cells = new Cell[64];
-			cells = GetBoard(board,test_cells);
+			Cell[] cellArr = new Cell[64];
+			cells = GetBoard(board, cellArr);
 			this.Controls.Add(cells);
-			board.allPossibleMoves = ChessAI.getAllPossibleMoves(board.board, 0);
-			blackAIButton.Checked = board.AI_BlackON;
-			whiteAIButton.Checked = board.AI_WhiteON;
-			drawBoard(board, test_cells);
+			startNewGame(board, cellArr);
+			newgame_button.Click += (sender, EventArgs) =>
+			{
+				newgame_Click(board, cellArr);
+				drawBoard(board, cellArr);
+				printBoard(board);
+			};
+			blackAIButton.Click += (sender, EventArgs) =>
+			{
+				changeCheckValue(board);
+			};
+			whiteAIButton.Click += (sender, EventArgs) =>
+			{
+				changeCheckValue(board);
+			};
+			drawBoard(board, cellArr);
 			printBoard(board);
 
 
@@ -113,7 +125,11 @@ namespace ChessProject
 
 		private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] cells)
 		{
-
+			System.Diagnostics.Debug.Write(board.AI_BlackON + " " + board.AI_WhiteON + " " + board.turn);
+			if ((board.AI_WhiteON && board.turn%2 == 0) || (board.AI_BlackON && board.turn%2==1 ))
+            {
+				doAITurn(board, cells);
+            }
 			Cell targetCell = (Cell)sender;
 
 			if (board.allPossibleMoves != null) { 
@@ -137,6 +153,7 @@ namespace ChessProject
 						if (board.allPossibleMoves == null)
 						{
 							System.Diagnostics.Debug.Write("\n ** IT'S A CHECKMATE, MATE ** \n");
+							showCheckmate(board);
 						}
 					} 
 				}
@@ -145,11 +162,16 @@ namespace ChessProject
             {
 				System.Diagnostics.Debug.Write("\n ** IT'S A CHECKMATE, MATE ** \n");
 			}
-
-
-
 		}
 
+		void showCheckmate(Board board)
+        {
+			String winner = board.turn % 2 == 1 ? "White" : "Black";
+			var m = new Form2(winner);
+			m.Show();
+			wait(5000);
+			m.Close();
+        }
 		void selectCell(Board board, Cell cell, Cell[] cells)
         {
 			board.selected_cell = cell.index;
@@ -191,20 +213,26 @@ namespace ChessProject
 			drawBoard(board, cells);
 			board.allPossibleMoves = ChessAI.getAllPossibleMoves(board.board, board.turn % 2);
 
+			// if ai on for the turné
             if ((board.turn % 2 == 1 && blackAIButton.Checked) || board.turn % 2 == 0 && whiteAIButton.Checked)
 			{
-				int[] result = ChessAI.AITurn(board);
-				wait(10);
-                if (result != null)
-				{
-					doTurn(board, cells, cells[result[0]], cells[result[1]]);
-				}
-				else
-				{
-					System.Diagnostics.Debug.Write("Debug nulll;");
-				}
+				doAITurn(board, cells);
 			}
 
+		}
+
+		void doAITurn(Board board, Cell[] cells)
+        {
+			int[] result = ChessAI.AITurn(board);
+			wait(10);
+			if (result != null)
+			{
+				doTurn(board, cells, cells[result[0]], cells[result[1]]);
+			}
+			else
+			{
+				System.Diagnostics.Debug.Write("Debug nulll;");
+			}
 		}
 
 		void drawBoard(Board board, Cell[] cells)
@@ -303,281 +331,14 @@ namespace ChessProject
 			}
 		}
 
+		void changeCheckValue(Board board)
+		{
 
-		//bool checkStraightMovement(Board board, int origin, int target, int movement)
-		//      {
-		//	if (origin / 8 != target / 8 && (movement == 1 || movement == -1)) return false;
-		//	if ((origin / 8 == target / 8) && (movement > 1 || movement < -1))
-		//	{
-		//              //System.Diagnostics.Debug.Write("|| failure: row: " + origin / 8 + " " + " row: " + target / 8 + " " + movement + "\n");
-		//              return false;
-		//	}
+			board.AI_WhiteON = whiteAIButton.Checked;
+			board.AI_BlackON = blackAIButton.Checked;
 
-		//	int row_diff = Math.Abs((origin / 8) - (target / 8));
-
-		//	if (origin > target && movement < 0)
-		//	{
-		//		if ((origin - target) % movement == 0)
-		//		{
-		//			int temp_position = origin;
-		//			int temp_value = 0;
-		//			while (true)
-		//			{
-		//				temp_position += movement;
-		//				temp_value++;
-		//				if (temp_position < 0 || temp_position > 63) { 
-		//					//System.Diagnostics.Debug.Write("|| failure: row: " + origin / 8 + " " + " row: " + target / 8 + " " + movement + "\n"); 
-		//					break; 
-		//				}
-
-		//				if (board.board[temp_position] != 0 && temp_position != target)
-		//				{
-		//					//System.Diagnostics.Debug.Write("|| failure: row: " + origin / 8 + " " + " row: " + target / 8 + " " + movement + "\n");
-		//					return false;
-		//				}
-		//				if (temp_position == target)
-		//				{
-		//					//System.Diagnostics.Debug.Write("** Row diff: " + row_diff + " temp_value: " + temp_value + "\n");
-		//					if (row_diff == temp_value || row_diff == 0) 
-		//					{ 
-		//						if (getCellColor(target, board) == -1) {
-		//							//System.Diagnostics.Debug.Write("|| Sucess: Origin: " +origin + " Target: " + target + " Movement: " + movement + "\n"); 
-		//							return true; 
-		//						}
-		//						if (getCellColor(origin, board) != getCellColor(target, board)) { 
-		//							//System.Diagnostics.Debug.Write("|| Sucess: Origin: " + origin + " Target: " + target + " Movement: " + movement + "\n"); 
-		//							return true; 
-		//						}
-		//					}
-		//				}
-		//			}
-		//		}
-		//	}
-
-		//	if (origin < target && movement > 0)
-		//	{
-		//		if ((target - origin) % movement == 0)
-		//		{
-		//			int temp_position = origin;
-		//			int temp_value = 0;
-		//			while (true)
-		//			{
-		//				temp_position += movement;
-		//				temp_value++;
-		//				if (temp_position < 0 || temp_position > 63) { 
-		//					//System.Diagnostics.Debug.Write("|| failure: row: " + origin / 8 + " " + " row: " + target / 8 + " " + movement + "\n"); 
-		//					break; 
-		//				}
-
-		//				if (board.board[temp_position] != 0 && temp_position != target)
-		//				{
-		//					//System.Diagnostics.Debug.Write("|| failure: row: " + origin / 8 + " " + " row: " + target / 8 + " " + movement + "\n");
-		//					return false;
-		//				}
-
-		//				if (temp_position == target)
-		//				{
-		//					//System.Diagnostics.Debug.Write("** Row diff: " + row_diff + " temp_value: " + temp_value + "\n");
-		//					if (row_diff == temp_value || row_diff == 0)
-		//					{
-		//						if (getCellColor(target, board) == -1) { 
-		//							//System.Diagnostics.Debug.Write("|| Sucess: Origin: " + origin + " Target: " + target + " Movement: " + movement + "\n"); 
-		//							return true; 
-		//						}
-		//						if (getCellColor(origin, board) != getCellColor(target, board)) { 
-		//							//System.Diagnostics.Debug.Write("|| Sucess: Origin: " + origin + " Target: " + target + " Movement: " + movement + "\n"); 
-		//							return true; 
-		//						}
-		//					}
-		//				}
-		//			}
-		//		}
-		//	}
-
-		//	return false;
-		//      }
-
-
-		//bool checkStraightMovement(int[] board, int origin, int target, int movement)
-		//{
-		//	if (origin / 8 != target / 8 && (movement == 1 || movement == -1)) return false;
-		//	if ((origin / 8 == target / 8) && (movement > 1 || movement < -1))
-		//	{
-		//		//System.Diagnostics.Debug.Write("|| failure: row: " + origin / 8 + " " + " row: " + target / 8 + " " + movement + "\n");
-		//		return false;
-		//	}
-
-		//	int row_diff = Math.Abs((origin / 8) - (target / 8));
-
-		//	if (origin > target && movement < 0)
-		//	{
-		//		if ((origin - target) % movement == 0)
-		//		{
-		//			int temp_position = origin;
-		//			int temp_value = 0;
-		//			while (true)
-		//			{
-		//				temp_position += movement;
-		//				temp_value++;
-		//				if (temp_position < 0 || temp_position > 63)
-		//				{
-		//					//System.Diagnostics.Debug.Write("|| failure: row: " + origin / 8 + " " + " row: " + target / 8 + " " + movement + "\n"); 
-		//					break;
-		//				}
-
-		//				if (board[temp_position] != 0 && temp_position != target)
-		//				{
-		//					//System.Diagnostics.Debug.Write("|| failure: row: " + origin / 8 + " " + " row: " + target / 8 + " " + movement + "\n");
-		//					return false;
-		//				}
-		//				if (temp_position == target)
-		//				{
-		//					//System.Diagnostics.Debug.Write("** Row diff: " + row_diff + " temp_value: " + temp_value + "\n");
-		//					if (row_diff == temp_value || row_diff == 0)
-		//					{
-		//						if (getCellColor(target, board) == -1)
-		//						{
-		//							//System.Diagnostics.Debug.Write("|| Sucess: Origin: " +origin + " Target: " + target + " Movement: " + movement + "\n"); 
-		//							return true;
-		//						}
-		//						if (getCellColor(origin, board) != getCellColor(target, board))
-		//						{
-		//							//System.Diagnostics.Debug.Write("|| Sucess: Origin: " + origin + " Target: " + target + " Movement: " + movement + "\n"); 
-		//							return true;
-		//						}
-		//					}
-		//				}
-		//			}
-		//		}
-		//	}
-
-		//	if (origin < target && movement > 0)
-		//	{
-		//		if ((target - origin) % movement == 0)
-		//		{
-		//			int temp_position = origin;
-		//			int temp_value = 0;
-		//			while (true)
-		//			{
-		//				temp_position += movement;
-		//				temp_value++;
-		//				if (temp_position < 0 || temp_position > 63)
-		//				{
-		//					//System.Diagnostics.Debug.Write("|| failure: row: " + origin / 8 + " " + " row: " + target / 8 + " " + movement + "\n"); 
-		//					break;
-		//				}
-
-		//				if (board[temp_position] != 0 && temp_position != target)
-		//				{
-		//					//System.Diagnostics.Debug.Write("|| failure: row: " + origin / 8 + " " + " row: " + target / 8 + " " + movement + "\n");
-		//					return false;
-		//				}
-
-		//				if (temp_position == target)
-		//				{
-		//					//System.Diagnostics.Debug.Write("** Row diff: " + row_diff + " temp_value: " + temp_value + "\n");
-		//					if (row_diff == temp_value || row_diff == 0)
-		//					{
-		//						if (getCellColor(target, board) == -1)
-		//						{
-		//							//System.Diagnostics.Debug.Write("|| Sucess: Origin: " + origin + " Target: " + target + " Movement: " + movement + "\n"); 
-		//							return true;
-		//						}
-		//						if (getCellColor(origin, board) != getCellColor(target, board))
-		//						{
-		//							//System.Diagnostics.Debug.Write("|| Sucess: Origin: " + origin + " Target: " + target + " Movement: " + movement + "\n"); 
-		//							return true;
-		//						}
-		//					}
-		//				}
-		//			}
-		//		}
-		//	}
-
-		//	return false;
-		//}
-
-		//int[][] getAllPossibleMoves(int[] board, int color)
-		//      {
-
-		//	int[][] superArray = new int[64][];
-		//	int[] tempArray = new int[28];
-		//	bool empty = true;
-
-		//	for (int i = 0; i < superArray.Length; i++)
-		//          {
-		//		int gotColor = getCellColor(i, board);
-		//		if  ( gotColor == color)
-		//              {
-		//			tempArray = getPossibleMovesLow(board, i);
-		//			if (tempArray[0] != -1) {
-		//				superArray[i] = new int[28];
-		//				Array.Copy(tempArray, superArray[i], 28);
-		//				empty = false;
-		//			}
-
-		//		}
-		//          }
-		//	if (!empty) return superArray;
-		//	else return null;
-		//      }
-
-		//int[] getPossibleMovesLow(int[] board, int originCell)
-		//{
-		//	int[] moveArray =
-		//	{
-		//		-1, -1, -1, -1,-1, -1, -1, -1, -1,-1,
-		//		-1, -1, -1, -1,-1, -1, -1, -1, -1,-1,
-		//		-1, -1, -1, -1,-1, -1, -1, -1
-		//	};
-
-
-		//		int temp = 0;
-		//		for (int i = 0; i < board.Length; i++)
-		//		{
-
-		//			if (legalMoveNew(board, originCell, i, 0))
-		//			{
-		//				moveArray[temp] = i;
-		//				temp++;
-		//			}
-
-		//		}
-		//		//System.Diagnostics.Debug.Write("\n" + "possible moves length: " + temp + "\n");
-
-		//	//printArray(moveArray, printBoxDebug);
-		//	return moveArray;
-		//}
-
-		//int[] getPossibleMoves(Board board, Cell[] cells, Cell originCell)
-		//      {
-		//	int[] moveArray =
-		//	{
-		//		-1, -1, -1, -1,-1, -1, -1, -1, -1,-1,
-		//		-1, -1, -1, -1,-1, -1, -1, -1, -1,-1,
-		//		-1, -1, -1, -1,-1, -1, -1, -1
-		//	};
-
-		//	if (board.selected_cell != -1)
-		//          {
-		//		int temp = 0;
-		//		for (int i = 0; i < board.board.Length; i++)
-		//              {
-
-		//				if (legalMoveNew(board.board, originCell.index, i, 0))
-		//                      {
-		//					moveArray[temp] = i;
-		//					requireUpdatedDrawing(cells[i]);
-		//					temp++;
-		//                      }
-
-		//              }
-		//		//System.Diagnostics.Debug.Write("\n" + "possible moves length: " + temp + "\n");
-		//          }
-		//	printArray(moveArray, printBoxDebug);
-		//	return moveArray;
-		//      }
-
+			System.Diagnostics.Debug.Write(board.AI_WhiteON + "<-- white, black --> " + board.AI_BlackON + "\n");
+		}
 
 		int[] resetPossibleMoves(Board board, Cell[] cells)
         {
@@ -670,7 +431,34 @@ namespace ChessProject
 			}
 		}
 
-    }
+
+	 
+	
+
+	void newgame_Click(Board board, Cell[] cells)
+	{
+			startNewGame(board, cells);
+	}
+
+		void startNewGame(Board board, Cell[] cells)
+        {
+
+			board.initializeBoard();
+			foreach (Cell cell in cells)
+			{
+				requireUpdatedDrawing(cell);
+			}
+
+			board.allPossibleMoves = ChessAI.getAllPossibleMoves(board.board, 0);
+			blackAIButton.Checked = board.AI_BlackON;
+			whiteAIButton.Checked = board.AI_WhiteON;
+			turn_label.Text = (board.turn % 2 == 0) ? "White" : "Black";
+			drawBoard(board, cells);
+			printBoard(board);
+		}
+
+
+}
 
 
 }

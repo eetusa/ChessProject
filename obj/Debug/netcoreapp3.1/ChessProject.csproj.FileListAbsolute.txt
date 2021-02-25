@@ -25,3 +25,4 @@ C:\Users\eetus\Opinnot\vsprojektit\ChessProject\ChessProject\ChessProject\bin\De
 C:\Users\eetus\Opinnot\vsprojektit\ChessProject\ChessProject\ChessProject\bin\Debug\netcoreapp3.1\images\7.png
 C:\Users\eetus\Opinnot\vsprojektit\ChessProject\ChessProject\ChessProject\bin\Debug\netcoreapp3.1\images\8.png
 C:\Users\eetus\Opinnot\vsprojektit\ChessProject\ChessProject\ChessProject\bin\Debug\netcoreapp3.1\images\9.png
+C:\Users\eetus\Opinnot\vsprojektit\ChessProject\ChessProject\ChessProject\obj\Debug\netcoreapp3.1\ChessProject.Form2.resources

@@ -34,6 +34,7 @@ namespace ChessProject
             this.printBoxDebug = new System.Windows.Forms.TextBox();
             this.whiteAIButton = new System.Windows.Forms.CheckBox();
             this.blackAIButton = new System.Windows.Forms.CheckBox();
+            this.newgame_button = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // turn_label
@@ -87,11 +88,22 @@ namespace ChessProject
             this.blackAIButton.Text = "Black AI";
             this.blackAIButton.UseVisualStyleBackColor = true;
             // 
+            // newgame_button
+            // 
+            this.newgame_button.Location = new System.Drawing.Point(1019, 632);
+            this.newgame_button.Name = "newgame_button";
+            this.newgame_button.Size = new System.Drawing.Size(94, 29);
+            this.newgame_button.TabIndex = 5;
+            this.newgame_button.Text = "New game";
+            this.newgame_button.UseVisualStyleBackColor = true;
+
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1125, 1055);
+            this.Controls.Add(this.newgame_button);
             this.Controls.Add(this.blackAIButton);
             this.Controls.Add(this.whiteAIButton);
             this.Controls.Add(this.printBoxDebug);
@@ -112,6 +124,7 @@ namespace ChessProject
         private System.Windows.Forms.TextBox printBoxDebug;
         private System.Windows.Forms.CheckBox whiteAIButton;
         private System.Windows.Forms.CheckBox blackAIButton;
+        private System.Windows.Forms.Button newgame_button;
     }
 }
 

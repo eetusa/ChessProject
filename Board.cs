@@ -14,6 +14,11 @@ namespace ChessProject
 		public bool AI_WhiteON, AI_BlackON;
 		public Board()
 		{
+			this.initializeBoard();
+		}
+
+		public void initializeBoard()
+		{
 			board = new int[] {
 								18, 17, 16, 19, 20, 16, 17, 18,
 								11, 11, 11, 11, 11, 11, 11, 11,
@@ -36,4 +41,5 @@ namespace ChessProject
 			this.AI_WhiteON = false;
 		}
 	}
+
 }
