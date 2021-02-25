@@ -115,98 +115,95 @@ namespace ChessProject
 		{
 
 			Cell targetCell = (Cell)sender;
-			int cell_contentColor = getCellColor(targetCell, board);
-			
+
 			if (board.allPossibleMoves != null) { 
 				if (board.selected_cell == -1) // if no cell active selected
 				{
-					if (board.turn % 2 == cell_contentColor ) // if correct color piece clicked on turn set cell as selected
+					if (board.turn % 2 == getCellColor(targetCell, board)) // if correct color piece clicked on turn set cell as selected
 					{
-						board.selected_cell = targetCell.index;
-						requireUpdatedDrawing(targetCell);
-						board.possibleMoves = board.allPossibleMoves[targetCell.index];
-						//board.possibleMoves = getPossibleMoves(board, cells, targetCell);
-						// draw possbile moves -> go through all indexes and check for legality
-						printArray(board.possibleMoves, printBoxDebug);
-						drawBoard(board, cells);
-					
+						selectCell(board, targetCell, cells);
 					}
 				}
 				else
 				{
 					Cell originCell = cells[board.selected_cell];
-				
 					if (originCell == targetCell) // if clicked cell same as is active
 					{
-						board.selected_cell = -1; // reset selection to none
-						board.possibleMoves = resetPossibleMoves(board, cells);
-						requireUpdatedDrawing(originCell);
-						drawBoard(board, cells);
-						printArray(board.possibleMoves, printBoxDebug);
+						deselectCell(board, originCell, cells);
 
 					} else if (board.allPossibleMoves[originCell.index] != null && board.allPossibleMoves[originCell.index].Contains(targetCell.index)) 
 					{
-						board.possibleMoves = resetPossibleMoves(board, cells);
-						board.board[targetCell.index] = board.board[board.selected_cell];
-						board.board[board.selected_cell] = 0;
-						requireUpdatedDrawing(originCell);
-						requireUpdatedDrawing(targetCell);
-						board.selected_cell = -1;
-
-						if (board.turn % 2 == 0) { board.turn += 1; turn_label.Text = "Black"; }
-						else
-						{ board.turn += 1; turn_label.Text = "White"; }
-						printBoard(board);
-						drawBoard(board, cells);
-						board.allPossibleMoves = ChessAI.getAllPossibleMoves(board.board, board.turn % 2);
+						doTurn(board, cells, originCell, targetCell);
 						if (board.allPossibleMoves == null)
 						{
 							System.Diagnostics.Debug.Write("\n ** IT'S A CHECKMATE, MATE ** \n");
 						}
-
-
-						if (board.turn % 2 == 1 && blackAIButton.Checked)
-                        {
-							int[] result = ChessAI.AITurn(board);
-							if (result != null)
-                            {
-								System.Diagnostics.Debug.Write(result[0] + " >> " + result[1]);
-								requireUpdatedDrawing(cells[result[1]]);
-								requireUpdatedDrawing(cells[result[0]]);
-								board.board[result[1]] = board.board[result[0]];
-								board.board[result[0]] = 0;
-								board.selected_cell = -1;
-
-								if (board.turn % 2 == 0) { board.turn += 1; turn_label.Text = "Black"; }
-								else
-								{ board.turn += 1; turn_label.Text = "White"; }
-								printBoard(board);
-								drawBoard(board, cells);
-								board.allPossibleMoves = ChessAI.getAllPossibleMoves(board.board, board.turn % 2);
-								if (board.allPossibleMoves == null)
-								{
-									System.Diagnostics.Debug.Write("\n ** IT'S A CHECKMATE, MATE ** \n");
-								}
-							} else
-                            {
-								System.Diagnostics.Debug.Write("Debug nulll;");
-                            }
-                        } else if (board.turn % 2 == 0 && whiteAIButton.Checked)
-                        {
-
-                        }
-
 					} 
-
-
-
 				}
+
 			} else
             {
 				System.Diagnostics.Debug.Write("\n ** IT'S A CHECKMATE, MATE ** \n");
 			}
 
 
+
+		}
+
+		void selectCell(Board board, Cell cell, Cell[] cells)
+        {
+			board.selected_cell = cell.index;
+			requireUpdatedDrawing(cell);
+			board.possibleMoves = board.allPossibleMoves[cell.index];
+			printArray(board.possibleMoves, printBoxDebug);
+			drawBoard(board, cells);
+		}
+
+		void deselectCell(Board board, Cell cell, Cell[] cells)
+        {
+			board.selected_cell = -1; // reset selection to none
+			board.possibleMoves = resetPossibleMoves(board, cells);
+			requireUpdatedDrawing(cell);
+			drawBoard(board, cells);
+			printArray(board.possibleMoves, printBoxDebug);
+		}
+
+		void doTurn(Board board, Cell[] cells, Cell originCell, Cell targetCell) 
+        {
+			if (board.allPossibleMoves == null)
+			{
+				System.Diagnostics.Debug.Write("\n ** IT'S A CHECKMATE, MATE ** \n");
+				return;
+			}
+			// update gamestate
+			board.possibleMoves = resetPossibleMoves(board, cells);
+			board.board[targetCell.index] = board.board[originCell.index];
+			board.board[originCell.index] = 0;
+			requireUpdatedDrawing(originCell);
+			requireUpdatedDrawing(targetCell);
+			board.selected_cell = -1;
+
+			// change turn, draw all and get new moves
+			if (board.turn % 2 == 0) { board.turn += 1; turn_label.Text = "Black"; }
+			else
+			{ board.turn += 1; turn_label.Text = "White"; }
+			printBoard(board);
+			drawBoard(board, cells);
+			board.allPossibleMoves = ChessAI.getAllPossibleMoves(board.board, board.turn % 2);
+
+            if ((board.turn % 2 == 1 && blackAIButton.Checked) || board.turn % 2 == 0 && whiteAIButton.Checked)
+			{
+				int[] result = ChessAI.AITurn(board);
+				wait(10);
+                if (result != null)
+				{
+					doTurn(board, cells, cells[result[0]], cells[result[1]]);
+				}
+				else
+				{
+					System.Diagnostics.Debug.Write("Debug nulll;");
+				}
+			}
 
 		}
 
@@ -283,14 +280,37 @@ namespace ChessProject
 			//cell.BackColor = !(cell.col % 2 == cell.row % 2) ? Color.FromArgb(216, 226, 205) : Color.FromArgb(250, 250, 241);
 			cell.BackColor = Color.FromArgb(253, 217, 200);
 		}
+		public void wait(int milliseconds)
+		{
+			var timer1 = new System.Windows.Forms.Timer();
+			if (milliseconds == 0 || milliseconds < 0) return;
+
+			// Console.WriteLine("start wait timer");
+			timer1.Interval = milliseconds;
+			timer1.Enabled = true;
+			timer1.Start();
+
+			timer1.Tick += (s, e) =>
+			{
+				timer1.Enabled = false;
+				timer1.Stop();
+				// Console.WriteLine("stop wait timer");
+			};
+
+			while (timer1.Enabled)
+			{
+				Application.DoEvents();
+			}
+		}
+
 
 		//bool checkStraightMovement(Board board, int origin, int target, int movement)
-  //      {
+		//      {
 		//	if (origin / 8 != target / 8 && (movement == 1 || movement == -1)) return false;
 		//	if ((origin / 8 == target / 8) && (movement > 1 || movement < -1))
 		//	{
-  //              //System.Diagnostics.Debug.Write("|| failure: row: " + origin / 8 + " " + " row: " + target / 8 + " " + movement + "\n");
-  //              return false;
+		//              //System.Diagnostics.Debug.Write("|| failure: row: " + origin / 8 + " " + " row: " + target / 8 + " " + movement + "\n");
+		//              return false;
 		//	}
 
 		//	int row_diff = Math.Abs((origin / 8) - (target / 8));
@@ -373,9 +393,9 @@ namespace ChessProject
 		//			}
 		//		}
 		//	}
-			
+
 		//	return false;
-  //      }
+		//      }
 
 
 		//bool checkStraightMovement(int[] board, int origin, int target, int movement)
@@ -478,17 +498,17 @@ namespace ChessProject
 		//}
 
 		//int[][] getAllPossibleMoves(int[] board, int color)
-  //      {
+		//      {
 
 		//	int[][] superArray = new int[64][];
 		//	int[] tempArray = new int[28];
 		//	bool empty = true;
 
 		//	for (int i = 0; i < superArray.Length; i++)
-  //          {
+		//          {
 		//		int gotColor = getCellColor(i, board);
 		//		if  ( gotColor == color)
-  //              {
+		//              {
 		//			tempArray = getPossibleMovesLow(board, i);
 		//			if (tempArray[0] != -1) {
 		//				superArray[i] = new int[28];
@@ -497,10 +517,10 @@ namespace ChessProject
 		//			}
 
 		//		}
-  //          }
+		//          }
 		//	if (!empty) return superArray;
 		//	else return null;
-  //      }
+		//      }
 
 		//int[] getPossibleMovesLow(int[] board, int originCell)
 		//{
@@ -524,13 +544,13 @@ namespace ChessProject
 
 		//		}
 		//		//System.Diagnostics.Debug.Write("\n" + "possible moves length: " + temp + "\n");
-			
+
 		//	//printArray(moveArray, printBoxDebug);
 		//	return moveArray;
 		//}
 
 		//int[] getPossibleMoves(Board board, Cell[] cells, Cell originCell)
-  //      {
+		//      {
 		//	int[] moveArray =
 		//	{
 		//		-1, -1, -1, -1,-1, -1, -1, -1, -1,-1,
@@ -539,24 +559,24 @@ namespace ChessProject
 		//	};
 
 		//	if (board.selected_cell != -1)
-  //          {
+		//          {
 		//		int temp = 0;
 		//		for (int i = 0; i < board.board.Length; i++)
-  //              {
-					
+		//              {
+
 		//				if (legalMoveNew(board.board, originCell.index, i, 0))
-  //                      {
+		//                      {
 		//					moveArray[temp] = i;
 		//					requireUpdatedDrawing(cells[i]);
 		//					temp++;
-  //                      }
-                    
-  //              }
+		//                      }
+
+		//              }
 		//		//System.Diagnostics.Debug.Write("\n" + "possible moves length: " + temp + "\n");
-  //          }
+		//          }
 		//	printArray(moveArray, printBoxDebug);
 		//	return moveArray;
-  //      }
+		//      }
 
 
 		int[] resetPossibleMoves(Board board, Cell[] cells)

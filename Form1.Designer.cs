@@ -39,40 +39,39 @@ namespace ChessProject
             // turn_label
             // 
             this.turn_label.AutoSize = true;
-            this.turn_label.Location = new System.Drawing.Point(921, 24);
+            this.turn_label.Location = new System.Drawing.Point(1053, 32);
             this.turn_label.Name = "turn_label";
-            this.turn_label.Size = new System.Drawing.Size(31, 15);
+            this.turn_label.Size = new System.Drawing.Size(38, 20);
             this.turn_label.TabIndex = 0;
             this.turn_label.Text = "Turn";
             // 
             // boardIntCont
             // 
             this.boardIntCont.Font = new System.Drawing.Font("Courier New", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.boardIntCont.Location = new System.Drawing.Point(842, 61);
-            this.boardIntCont.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.boardIntCont.Location = new System.Drawing.Point(940, 81);
             this.boardIntCont.Multiline = true;
             this.boardIntCont.Name = "boardIntCont";
             this.boardIntCont.ReadOnly = true;
-            this.boardIntCont.Size = new System.Drawing.Size(130, 109);
+            this.boardIntCont.Size = new System.Drawing.Size(170, 144);
             this.boardIntCont.TabIndex = 1;
             // 
             // printBoxDebug
             // 
             this.printBoxDebug.Font = new System.Drawing.Font("Courier New", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.printBoxDebug.Location = new System.Drawing.Point(842, 193);
-            this.printBoxDebug.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.printBoxDebug.Location = new System.Drawing.Point(940, 257);
             this.printBoxDebug.Multiline = true;
             this.printBoxDebug.Name = "printBoxDebug";
             this.printBoxDebug.ReadOnly = true;
-            this.printBoxDebug.Size = new System.Drawing.Size(130, 176);
+            this.printBoxDebug.Size = new System.Drawing.Size(170, 233);
             this.printBoxDebug.TabIndex = 2;
             // 
             // whiteAIButton
             // 
             this.whiteAIButton.AutoSize = true;
-            this.whiteAIButton.Location = new System.Drawing.Point(901, 374);
+            this.whiteAIButton.Location = new System.Drawing.Point(1030, 499);
+            this.whiteAIButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.whiteAIButton.Name = "whiteAIButton";
-            this.whiteAIButton.Size = new System.Drawing.Size(71, 19);
+            this.whiteAIButton.Size = new System.Drawing.Size(88, 24);
             this.whiteAIButton.TabIndex = 3;
             this.whiteAIButton.Text = "White AI";
             this.whiteAIButton.UseVisualStyleBackColor = true;
@@ -80,24 +79,24 @@ namespace ChessProject
             // blackAIButton
             // 
             this.blackAIButton.AutoSize = true;
-            this.blackAIButton.Location = new System.Drawing.Point(901, 399);
+            this.blackAIButton.Location = new System.Drawing.Point(1030, 532);
+            this.blackAIButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.blackAIButton.Name = "blackAIButton";
-            this.blackAIButton.Size = new System.Drawing.Size(68, 19);
+            this.blackAIButton.Size = new System.Drawing.Size(84, 24);
             this.blackAIButton.TabIndex = 4;
             this.blackAIButton.Text = "Black AI";
             this.blackAIButton.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(984, 961);
+            this.ClientSize = new System.Drawing.Size(1125, 1055);
             this.Controls.Add(this.blackAIButton);
             this.Controls.Add(this.whiteAIButton);
             this.Controls.Add(this.printBoxDebug);
             this.Controls.Add(this.boardIntCont);
             this.Controls.Add(this.turn_label);
-            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "Form1";
             this.Text = "ö";
             this.Load += new System.EventHandler(this.Form1_Load);

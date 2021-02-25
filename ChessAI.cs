@@ -117,6 +117,14 @@ namespace ChessProject
             return moveArray;
         }
 
+		static int[] checkPawnUpdate(int[] board)
+        {
+			for (int i = 0; i < 8; i++)
+            {
+				//if (board[i] == 0) ;
+            }
+			return null;
+        }
         static bool kingThreatened(int[] board, int originCell, int targetCell)
         {
             int[] tempArr = new int[64];
