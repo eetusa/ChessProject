@@ -19,6 +19,30 @@ namespace ChessProject
 			this.initializeBoard();
 		}
 
+		public void initializeTestBoard()
+        {
+			board = new int[] {
+								38, 0, 0, 0, 40, 16, 17, 38,
+								11, 11, 0, 11, 11, 11, 11, 11,
+								0, 0, 0, 0, 0, 0, 0, 0,
+								0, 0, 8, 0, 0, 0, 0, 0,
+								0, 0, 0, 0, 0, 0, 0, 0,
+								0, 0, 18, 0, 0, 0, 19, 0,
+								1, 1, 0, 0, 0, 1, 0, 1,
+								28, 0, 0, 0, 30, 0, 0, 28,
+								};
+			this.selected_cell = -1;
+			this.turn = 0;
+			this.possibleMoves = new int[] {
+				-1, -1, -1, -1,-1, -1, -1, -1, -1,-1,
+				-1, -1, -1, -1,-1, -1, -1, -1, -1,-1,
+				-1, -1, -1, -1,-1, -1, -1, -1
+			};
+			this.allPossibleMoves = new int[64][];
+			this.AI_BlackON = false;
+			this.AI_WhiteON = false;
+		}
+
 		public void initializeBoard()
 		{
 			board = new int[] {

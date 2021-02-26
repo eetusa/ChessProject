@@ -14,9 +14,6 @@ namespace ChessProject
             int turn = Cboard.turn;
             int[] board = Cboard.board;
 
-            testi(board);
-			
-
             return randomMove(board, turn, Cboard.allPossibleMoves);
         }
 
@@ -60,12 +57,8 @@ namespace ChessProject
 
 			return result;
         }
-
-        static void testi(int[] board)
-        {
-
-        }
-        public static int[][] getAllPossibleMoves(int[] board, int color)
+        
+		public static int[][] getAllPossibleMoves(int[] board, int color)
         {
 
             int[][] superArray = new int[64][];
@@ -221,7 +214,6 @@ namespace ChessProject
 			return result2;
         }
 
-
         static bool kingThreatened(int[] board, int originCell, int targetCell)
         {
             int[] tempArr = new int[64];
@@ -234,8 +226,12 @@ namespace ChessProject
             }
 
             int cellColor = getCellColor(originCell, board);
-            tempArr[targetCell] = tempArr[originCell];
-            tempArr[originCell] = 0;
+			if (targetCell != originCell)
+            {
+				tempArr[targetCell] = tempArr[originCell];
+				tempArr[originCell] = 0;
+			}
+           
 
             for (int i = 0; i < board.Length; i++)
             {
@@ -264,7 +260,6 @@ namespace ChessProject
             }
             return false;
         }
-
 
 		static bool kingThreatened(int[] board, int originCell, int targetCell, bool enpassant)
 		{
@@ -621,7 +616,7 @@ namespace ChessProject
 
 		public static void CancelEnPassant(int[] board, int color)
         {
-			System.Diagnostics.Debug.Write(" COLOR: " + color + " \n");
+			//System.Diagnostics.Debug.Write(" COLOR: " + color + " \n");
 			if (color == 1)
             {
 				for (int i = 24; i < 32; i++)
@@ -637,7 +632,6 @@ namespace ChessProject
 				}
 			}
 		}
-
 
 		public static int getCellColor(int cellIndex, int[] board)
 		{
@@ -656,10 +650,12 @@ namespace ChessProject
 
 		static bool canRookCastle(int[] board, int originCell, int targetCell)
         {
+			//System.Diagnostics.Debug.Write("OriginCell: " + originCell + " targetCell: " + targetCell + "\n");
 			if (targetCell > originCell)
             {
 				for (int i = originCell+1; i < targetCell; i++)
                 {
+					
 					if (board[i] != 0)
                     {
 						return false;
@@ -667,7 +663,8 @@ namespace ChessProject
                 }
 				for (int i = targetCell; i > targetCell - 3; i--)
                 {
-					if (kingThreatened(board, originCell, targetCell)) return false;
+					System.Diagnostics.Debug.Write("targetcell > origincell. i: " + i + " targetcell: " +targetCell + " originCell: " + originCell +"\n");
+					if (kingThreatened(board, targetCell, i)) return false;
                 }
 			}
             else
@@ -679,9 +676,11 @@ namespace ChessProject
 						return false;
 					}
 				}
-				for (int i = targetCell; i < targetCell - 3; i++)
+				//System.Diagnostics.Debug.Write(targetCell + " x " + (targetCell - 3) + " ");
+				for (int i = targetCell; i < targetCell + 3; i++)
 				{
-					if (kingThreatened(board, originCell, targetCell)) return false;
+					System.Diagnostics.Debug.Write("targetcell < origincell. i: " + i + " targetcell: " + targetCell + " originCell: " + originCell + "\n");
+					if (kingThreatened(board, targetCell, i)) return false;
 				}
 			}
 			

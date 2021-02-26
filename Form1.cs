@@ -104,6 +104,13 @@ namespace ChessProject
 				drawBoard(board, cellArr);
 				printBoard(board);
 			};
+
+			testBoard1Btn.Click += (sender, EventArgs) =>
+			{
+				LoadTestBoard(board, cellArr);
+				drawBoard(board, cellArr);
+				printBoard(board);
+			};
 			blackAIButton.Click += (sender, EventArgs) =>
 			{
 				changeCheckValue(board);
@@ -135,7 +142,7 @@ namespace ChessProject
 
 private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] cells)
 		{
-			System.Diagnostics.Debug.Write(board.AI_BlackON + " " + board.AI_WhiteON + " " + board.turn);
+			//System.Diagnostics.Debug.Write(board.AI_BlackON + " " + board.AI_WhiteON + " " + board.turn);
 			if ((board.AI_WhiteON && board.turn%2 == 0) || (board.AI_BlackON && board.turn%2==1 ))
             {
 				doAITurn(board, cells);
@@ -448,7 +455,7 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 			int temp = 0;
 			for (int i = 0; i < board.Length; i++)
 			{
-				System.Diagnostics.Debug.Write(board[i] + " ");
+				//System.Diagnostics.Debug.Write(board[i] + " ");
 				if (board[i] > 9)
 				{
 					textbox.AppendText(board[i] + " ");
@@ -484,7 +491,25 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 			startNewGame(board, cells);
 	}
 
-	void startNewGame(Board board, Cell[] cells)
+
+		void LoadTestBoard(Board board, Cell[] cells)
+		{
+
+			board.initializeTestBoard();
+			foreach (Cell cell in cells)
+			{
+				requireUpdatedDrawing(cell);
+			}
+
+			board.allPossibleMoves = ChessAI.getAllPossibleMoves(board.board, 0);
+			blackAIButton.Checked = board.AI_BlackON;
+			whiteAIButton.Checked = board.AI_WhiteON;
+			turn_label.Text = (board.turn % 2 == 0) ? "White" : "Black";
+			drawBoard(board, cells);
+			printBoard(board);
+		}
+
+		void startNewGame(Board board, Cell[] cells)
     {
 
 		board.initializeBoard();

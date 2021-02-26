@@ -81,7 +81,7 @@ namespace ChessProject
             this.Controls.Add(this.runTestBtn);
             this.Controls.Add(this.textBox1);
             this.Name = "Form4";
-            this.Text = "Form4";
+            this.Text = "Perft test";
             this.ResumeLayout(false);
             this.PerformLayout();
 
