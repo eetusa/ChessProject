@@ -115,8 +115,19 @@ namespace ChessProject
 			drawBoard(board, cellArr);
 			printBoard(board);
 
+			test_button.Click += (sender, EventArgs) =>
+			{
+				openTestForm(board);
+			};
+
 
 		}
+
+		void openTestForm(Board board)
+        {
+			var m = new Form4(board);
+			m.Show();
+        }
 
 
 
@@ -134,7 +145,7 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 			if (board.allPossibleMoves != null) { 
 				if (board.selected_cell == -1) // if no cell active selected
 				{
-					if (board.turn % 2 == getCellColor(targetCell, board)) // if correct color piece clicked on turn set cell as selected
+					if (board.turn % 2 == ChessAI.getCellColor(targetCell.index, board.board)) // if correct color piece clicked on turn set cell as selected
 					{
 						selectCell(board, targetCell, cells);
 					}
@@ -197,11 +208,40 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 				return;
 			}
 			// update gamestate
-			board.possibleMoves = resetPossibleMoves(board, cells);
-			board.board[targetCell.index] = board.board[originCell.index];
-			board.board[originCell.index] = 0;
-			requireUpdatedDrawing(originCell);
-			requireUpdatedDrawing(targetCell);
+			if (( board.board[originCell.index] == 38 && board.board[targetCell.index] == 40) || (board.board[originCell.index] == 28 && board.board[targetCell.index] == 30))
+            {
+				board.possibleMoves = resetPossibleMoves(board, cells);
+				ChessAI.castleMove(board.board, originCell.index, targetCell.index, cells);
+            } else
+            {
+				if (board.board[originCell.index] == 1 || board.board[originCell.index] == 11)
+				{
+					if (board.board[targetCell.index] == 0)
+                    {
+						int movement = (originCell.index - targetCell.index);
+						if (movement == 7 || movement == -9)
+                        {
+							board.board[originCell.index + 1] = 0;
+							requireUpdatedDrawing(cells[originCell.index + 1]);
+                        }
+						else if (movement == -7 || movement == 9)
+						{
+							board.board[originCell.index - 1] = 0;
+							requireUpdatedDrawing(cells[originCell.index - 1]);
+						}
+					}
+
+				}
+				ChessAI.SetupEnpassantPawn(board.board, originCell.index, targetCell.index);
+
+				board.possibleMoves = resetPossibleMoves(board, cells);
+				checkFirstMoveByKingOrRook(board.board, originCell.index);
+				board.board[targetCell.index] = board.board[originCell.index];
+				board.board[originCell.index] = 0;
+				requireUpdatedDrawing(originCell);
+				requireUpdatedDrawing(targetCell);
+			}
+
 			board.selected_cell = -1;
 			ChessAI.checkPawnUpdate(board.board, aiTurn);
             
@@ -210,6 +250,7 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 			if (board.turn % 2 == 0) { board.turn += 1; turn_label.Text = "Black"; }
 			else
 			{ board.turn += 1; turn_label.Text = "White"; }
+			ChessAI.CancelEnPassant(board.board, board.turn % 2);
 			printBoard(board);
 			drawBoard(board, cells);
 			board.allPossibleMoves = ChessAI.getAllPossibleMoves(board.board, board.turn % 2);
@@ -221,6 +262,13 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 			}
 
 		}
+		void checkFirstMoveByKingOrRook(int[] board, int originCell)
+        {
+			if (board[originCell] == 28 || board[originCell] == 30 || board[originCell] == 38 || board[originCell] == 40)
+            {
+				board[originCell] = board[originCell] - 20;
+            }
+        }
 
 		void doAITurn(Board board, Cell[] cells)
         {
@@ -275,6 +323,8 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 					else if (cellValue > 10 && cellValue < 16)
 					{
 						cell.ImageLocation = @"images\11.png";
+					} else if (cellValue > 20) {
+						cell.ImageLocation = $@"images\{cellValue-20}.png";
 					}
 					else
 					{
@@ -452,7 +502,7 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 	}
 
 
-}
+    }
 
 
 }

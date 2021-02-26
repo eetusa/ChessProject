@@ -12,6 +12,8 @@ namespace ChessProject
 		public int[] possibleMoves;
 		public int[][] allPossibleMoves;
 		public bool AI_WhiteON, AI_BlackON;
+			//, whiteKingMoved, whiteRookLeftMoved, whiteRookRightMoved,
+			//blackKingMoved, blackRookLeftMoved, blackRookRightMoved;
 		public Board()
 		{
 			this.initializeBoard();
@@ -20,14 +22,14 @@ namespace ChessProject
 		public void initializeBoard()
 		{
 			board = new int[] {
-								18, 17, 16, 19, 20, 16, 17, 18,
+								38, 17, 16, 19, 40, 16, 17, 38,
 								11, 11, 11, 11, 11, 11, 11, 11,
 								0, 0, 0, 0, 0, 0, 0, 0,
 								0, 0, 0, 0, 0, 0, 0, 0,
 								0, 0, 0, 0, 0, 0, 0, 0,
 								0, 0, 0, 0, 0, 0, 0, 0,
 								1, 1, 1, 1, 1, 1, 1, 1,
-								8, 7, 6, 9, 10, 6, 7, 8,
+								28, 7, 6, 9, 30, 6, 7, 28,
 								};
 			this.selected_cell = -1;
 			this.turn = 0;
@@ -39,6 +41,12 @@ namespace ChessProject
 			this.allPossibleMoves = new int[64][];
 			this.AI_BlackON = true;
 			this.AI_WhiteON = false;
+			//this.whiteKingMoved = false; 
+			//this.whiteRookLeftMoved = false;
+			//this.whiteRookRightMoved = false;
+			//this.blackKingMoved = false;
+			//this.blackRookLeftMoved = false;
+			//this.blackRookRightMoved = false;
 		}
 	}
 
