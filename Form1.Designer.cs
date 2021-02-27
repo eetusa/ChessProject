@@ -37,6 +37,9 @@ namespace ChessProject
             this.newgame_button = new System.Windows.Forms.Button();
             this.test_button = new System.Windows.Forms.Button();
             this.testBoard1Btn = new System.Windows.Forms.Button();
+            this.printFENBtn = new System.Windows.Forms.Button();
+            this.fenDisp = new System.Windows.Forms.TextBox();
+            this.loadFENBtn = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // turn_label
@@ -101,7 +104,7 @@ namespace ChessProject
             // 
             // test_button
             // 
-            this.test_button.Location = new System.Drawing.Point(1020, 730);
+            this.test_button.Location = new System.Drawing.Point(1024, 683);
             this.test_button.Name = "test_button";
             this.test_button.Size = new System.Drawing.Size(94, 29);
             this.test_button.TabIndex = 6;
@@ -110,18 +113,47 @@ namespace ChessProject
             // 
             // testBoard1Btn
             // 
-            this.testBoard1Btn.Location = new System.Drawing.Point(798, 730);
+            this.testBoard1Btn.Location = new System.Drawing.Point(837, 632);
             this.testBoard1Btn.Name = "testBoard1Btn";
             this.testBoard1Btn.Size = new System.Drawing.Size(94, 29);
             this.testBoard1Btn.TabIndex = 7;
             this.testBoard1Btn.Text = "test board1";
             this.testBoard1Btn.UseVisualStyleBackColor = true;
             // 
+            // printFENBtn
+            // 
+            this.printFENBtn.Location = new System.Drawing.Point(12, 679);
+            this.printFENBtn.Name = "printFENBtn";
+            this.printFENBtn.Size = new System.Drawing.Size(94, 29);
+            this.printFENBtn.TabIndex = 8;
+            this.printFENBtn.Text = "Print FEN";
+            this.printFENBtn.UseVisualStyleBackColor = true;
+            // 
+            // fenDisp
+            // 
+            this.fenDisp.Font = new System.Drawing.Font("Segoe UI", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.fenDisp.Location = new System.Drawing.Point(12, 650);
+            this.fenDisp.Name = "fenDisp";
+            this.fenDisp.Size = new System.Drawing.Size(396, 23);
+            this.fenDisp.TabIndex = 10;
+            // 
+            // loadFENBtn
+            // 
+            this.loadFENBtn.Location = new System.Drawing.Point(121, 679);
+            this.loadFENBtn.Name = "loadFENBtn";
+            this.loadFENBtn.Size = new System.Drawing.Size(94, 29);
+            this.loadFENBtn.TabIndex = 11;
+            this.loadFENBtn.Text = "Load FEN";
+            this.loadFENBtn.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1125, 1055);
+            this.ClientSize = new System.Drawing.Size(1125, 753);
+            this.Controls.Add(this.loadFENBtn);
+            this.Controls.Add(this.fenDisp);
+            this.Controls.Add(this.printFENBtn);
             this.Controls.Add(this.testBoard1Btn);
             this.Controls.Add(this.test_button);
             this.Controls.Add(this.newgame_button);
@@ -131,7 +163,7 @@ namespace ChessProject
             this.Controls.Add(this.boardIntCont);
             this.Controls.Add(this.turn_label);
             this.Name = "Form1";
-            this.Text = "ö";
+            this.Text = "Chess engine";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -147,6 +179,9 @@ namespace ChessProject
         private System.Windows.Forms.Button newgame_button;
         private System.Windows.Forms.Button test_button;
         private System.Windows.Forms.Button testBoard1Btn;
+        private System.Windows.Forms.Button printFENBtn;
+        private System.Windows.Forms.TextBox fenDisp;
+        private System.Windows.Forms.Button loadFENBtn;
     }
 }
 

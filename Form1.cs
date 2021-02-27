@@ -126,6 +126,14 @@ namespace ChessProject
 			{
 				openTestForm(board);
 			};
+			printFENBtn.Click += (sender, EventArgs) =>
+			{
+				printFEN(board);
+			};
+			loadFENBtn.Click += (sender, EventArgs) =>
+			{
+				LoadFromFEN(board, cellArr);
+			};
 
 
 		}
@@ -169,7 +177,7 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 						doTurn(board, cells, originCell, targetCell, false);
 						if (board.allPossibleMoves == null)
 						{
-							System.Diagnostics.Debug.Write("\n ** IT'S A CHECKMATE, MATE ** \n");
+							//System.Diagnostics.Debug.Write("\n ** IT'S A CHECKMATE, MATE ** \n");
 							showCheckmate(board);
 						}
 					} 
@@ -177,7 +185,7 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 
 			} else
             {
-				System.Diagnostics.Debug.Write("\n ** IT'S A CHECKMATE, MATE ** \n");
+				//System.Diagnostics.Debug.Write("\n ** IT'S A CHECKMATE, MATE ** \n");
 			}
 		}
 
@@ -211,7 +219,7 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
         {
 			if (board.allPossibleMoves == null)
 			{
-				System.Diagnostics.Debug.Write("\n ** IT'S A CHECKMATE, MATE ** \n");
+				//System.Diagnostics.Debug.Write("\n ** IT'S A CHECKMATE, MATE ** \n");
 				return;
 			}
 			// update gamestate
@@ -242,7 +250,7 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 				ChessAI.SetupEnpassantPawn(board.board, originCell.index, targetCell.index);
 
 				board.possibleMoves = resetPossibleMoves(board, cells);
-				checkFirstMoveByKingOrRook(board.board, originCell.index);
+				ChessAI.checkFirstMoveByKingOrRook(board.board, originCell.index);
 				board.board[targetCell.index] = board.board[originCell.index];
 				board.board[originCell.index] = 0;
 				requireUpdatedDrawing(originCell);
@@ -269,13 +277,7 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 			}
 
 		}
-		void checkFirstMoveByKingOrRook(int[] board, int originCell)
-        {
-			if (board[originCell] == 28 || board[originCell] == 30 || board[originCell] == 38 || board[originCell] == 40)
-            {
-				board[originCell] = board[originCell] - 20;
-            }
-        }
+
 
 		void doAITurn(Board board, Cell[] cells)
         {
@@ -287,7 +289,7 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 			}
 			else
 			{
-				System.Diagnostics.Debug.Write("Debug nulll;");
+				//System.Diagnostics.Debug.Write("Debug nulll;");
 			}
 		}
 
@@ -486,10 +488,10 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 			}
 		}
 
-	void newgame_Click(Board board, Cell[] cells)
-	{
-			startNewGame(board, cells);
-	}
+		void newgame_Click(Board board, Cell[] cells)
+		{
+				startNewGame(board, cells);
+		}
 
 
 		void LoadTestBoard(Board board, Cell[] cells)
@@ -509,22 +511,38 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 			printBoard(board);
 		}
 
-		void startNewGame(Board board, Cell[] cells)
-    {
-
-		board.initializeBoard();
-		foreach (Cell cell in cells)
+		void printFEN(Board board)
 		{
-			requireUpdatedDrawing(cell);
+			fenDisp.Text = ChessAI.BoardToFEN(board.board, board.turn);
 		}
 
-		board.allPossibleMoves = ChessAI.getAllPossibleMoves(board.board, 0);
-		blackAIButton.Checked = board.AI_BlackON;
-		whiteAIButton.Checked = board.AI_WhiteON;
-		turn_label.Text = (board.turn % 2 == 0) ? "White" : "Black";
-		drawBoard(board, cells);
-		printBoard(board);
-	}
+		void LoadFromFEN(Board board, Cell[] cells)
+        {
+			if (fenDisp.Text == "") return;
+			ChessAI.FENToBoard(fenDisp.Text, board);
+			SetBoardSettings(board, cells);
+		}
+		void SetBoardSettings(Board board, Cell[] cells)
+        {
+			printBoard(board);
+			foreach (Cell cell in cells)
+			{
+				requireUpdatedDrawing(cell);
+			}
+			board.allPossibleMoves = ChessAI.getAllPossibleMoves(board.board, 0);
+			blackAIButton.Checked = board.AI_BlackON;
+			whiteAIButton.Checked = board.AI_WhiteON;
+			turn_label.Text = (board.turn % 2 == 0) ? "White" : "Black";
+			drawBoard(board, cells);
+			printBoard(board);
+		}
+
+		void startNewGame(Board board, Cell[] cells)
+		{
+
+			board.initializeBoard();
+			SetBoardSettings(board, cells);
+		}
 
 
     }

@@ -18,11 +18,17 @@ namespace ChessProject
             {
                 runTest(board);
             };
+
+            divideBtn.Click += (sender, EventArgs) =>
+            {
+                runDivideTest(board);
+            };
         }
 
         private void runTest(Board board)
         {
-            int turn = 0;
+            
+ 
             textBox1.Text = "";
             int[] expectedResults =
             {
@@ -41,7 +47,7 @@ namespace ChessProject
                 {
                     Stopwatch sw = new System.Diagnostics.Stopwatch();
                     sw.Restart();
-                    Int64 result = ChessAI.MoveGenerationTest(i, board.board, turn);
+                    Int64 result = ChessAI.MoveGenerationTest(i, board.board, board.turn);
                     sw.Stop();
                     textBox1.AppendText("Depth: " + i + "  Result: " + result +"  Time: "+ sw.Elapsed + "  Test: " + (result==expectedResults[i] ? "Pass" : "Fail"));
                     if (result != expectedResults[i])
@@ -57,7 +63,30 @@ namespace ChessProject
 
             }
         }
-        
-        
+
+        private void runDivideTest(Board board)
+        {
+
+            textBox1.Text = "";
+            try
+            {
+                int depth = Int32.Parse(depthInput.Text);
+                if (depth > 10)
+                {
+                    depth = 10;
+                }
+                Stopwatch sw = new System.Diagnostics.Stopwatch();
+                sw.Restart();
+                Int64 result = ChessAI.MoveGenerationTestDivide(depth, board.board, board.turn, depth, textBox1);
+                sw.Stop();                
+            }
+            catch
+            {
+
+            }
+
+        }
+
+
     }
 }

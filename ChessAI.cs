@@ -1,20 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Collections;
+using System.Linq;
 
 
 namespace ChessProject
 {
     public static class ChessAI
     {
-
-
         public static int[] AITurn(Board Cboard)
         {
             int turn = Cboard.turn;
             int[] board = Cboard.board;
 
             return randomMove(board, turn, Cboard.allPossibleMoves);
+        }
+
+		static int[] minimax(int[] board, int turn, int[][] allMoves, int depth)
+        {
+			if (depth == 0 || allMoves == null)
+            {
+				return null;
+            }
+			return null;
         }
 
 		static int[] randomMove(int[] board, int turn, int[][] allMoves)
@@ -100,6 +109,15 @@ namespace ChessProject
 
                 if (legalMoveNew(board, originCell, i, 0))
                 {
+					if ((board[originCell] == 1 && (i/8) == 0) || board[originCell] == 11 && (i/8) == 7)
+                    {
+						moveArray[temp] = i;
+						temp++;
+						moveArray[temp] = i;
+						temp++;
+						moveArray[temp] = i;
+						temp++;
+					}
                     moveArray[temp] = i;
                     temp++;
                 }
@@ -535,8 +553,9 @@ namespace ChessProject
 				{
 					return !kingThreatened(board, originCell, targetCell);
 				}
-				else if (movement == 16 && originCell / 8 == 6 && !targetOccupied && type != 1)
+				else if (movement == 16 && originCell / 8 == 6 && !targetOccupied && type != 1 && board[originCell - 8] == 0)
 				{
+					
 					if (!kingThreatened(board, originCell, targetCell))
 					{
 						//SetupEnPassant(board, originCell, targetCell);
@@ -544,11 +563,11 @@ namespace ChessProject
 					}
 					return false;
 				}
-				else if ((movement == 7 || movement == 9 && Math.Abs((originCell / 8) - (targetCell / 8)) == 1 ) && targetOccupiedByEnemy)
+				else if (( (movement == 7 || movement == 9) && (Math.Abs((originCell / 8) - (targetCell / 8)) == 1) ) && targetOccupiedByEnemy)
 				{
 					return !kingThreatened(board, originCell, targetCell);
 				}
-				else if ((movement == 7 || movement == 9 && Math.Abs((originCell / 8) - (targetCell / 8)) == 1) && (!targetOccupiedByEnemy))
+				else if (( (movement == 7 || movement == 9) && (Math.Abs((originCell / 8) - (targetCell / 8)) == 1) ) && (!targetOccupiedByEnemy))
 				{
 					return CheckEnPassant(board, originCell, targetCell, movement);
 				}
@@ -561,7 +580,7 @@ namespace ChessProject
 				{
 					return !kingThreatened(board, originCell, targetCell);
 				}
-				else if (movement == -16 && originCell / 8 == 1 && !targetOccupied && type != 1)
+				else if (movement == -16 && originCell / 8 == 1 && !targetOccupied && type != 1 && board[originCell + 8] == 0)
 				{
 					if (!kingThreatened(board,originCell,targetCell))
                     {
@@ -570,10 +589,11 @@ namespace ChessProject
                     }
 					return false;
 				}
-				else if ((movement == -7 || movement == -9 && Math.Abs((originCell / 8) - (targetCell / 8)) == 1) && (targetOccupiedByEnemy))
+				else if (((movement == -7 || movement == -9) && (Math.Abs((originCell / 8) - (targetCell / 8)) == 1)) && targetOccupiedByEnemy)
 				{
 					return !kingThreatened(board, originCell, targetCell);
-				} else if ((movement == -7 || movement == -9 && Math.Abs((originCell / 8) - (targetCell / 8)) == 1) && (!targetOccupiedByEnemy)){
+				} else if (((movement == -7 || movement == -9) && (Math.Abs((originCell / 8) - (targetCell / 8)) == 1)) && (!targetOccupiedByEnemy))
+				{
 					return CheckEnPassant(board, originCell, targetCell, movement);
                 }
 			}
@@ -588,15 +608,20 @@ namespace ChessProject
             {
 				if (movement == 7 || movement == -9)
                 {
+					if (originCell / 8 != 1 && originCell / 8 != 6)
+					{
+						//System.Diagnostics.Debug.Write(originCell + " " + targetCell + " " + getCellColor(originCell - 1, board) + " " + getCellColor(board[originCell + 1], board) + "\n");
+					}
 					if (board[originCell+1] == 2 || board[originCell+1] == 12)
                     {
-						if (getCellColor(originCell, board) != getCellColor(board[originCell + 1], board)) return !kingThreatened(board, originCell, targetCell, true);
+						if (getCellColor(originCell, board) != getCellColor(originCell + 1, board)) return !kingThreatened(board, originCell, targetCell, true);
                     }
-                } else if (movement == -8 || movement == 9)
+                } else if (movement == -7 || movement == 9)
                 {
 					if (board[originCell - 1] == 2 || board[originCell - 1] == 12)
 					{
-						if (getCellColor(originCell, board) != getCellColor(board[originCell - 1], board)) return !kingThreatened(board, originCell, targetCell, true);
+						//System.Diagnostics.Debug.Write(getCellColor(originCell, board) + " " + getCellColor(board[originCell - 1], board));
+						if (getCellColor(originCell, board) != getCellColor(originCell - 1, board)) return !kingThreatened(board, originCell, targetCell, true);
 					}
 				}
 
@@ -633,6 +658,34 @@ namespace ChessProject
 			}
 		}
 
+		public static void CancelEnPassant(int[] board)
+		{
+			//System.Diagnostics.Debug.Write(" COLOR: " + color + " \n");
+				for (int i = 24; i < 32; i++)
+				{
+					if (board[i] == 12) board[i] = 11;
+				}
+			
+
+				for (int j = 32; j < 40; j++)
+				{
+					if (board[j] == 2) board[j] = 1;
+				}
+		}
+
+		public static int CancelEnPassantReturn(int[] board)
+		{
+			for (int i = 24; i < 32; i++)
+			{
+				if (board[i] == 12) { board[i] = 11; return i; }
+			}
+
+			for (int j = 32; j < 40; j++)
+			{
+				if (board[j] == 2) { board[j] = 1; return j; }
+			}
+			return -1;
+		}
 		public static int getCellColor(int cellIndex, int[] board)
 		{
 			int cellContentInt = board[cellIndex];
@@ -663,7 +716,7 @@ namespace ChessProject
                 }
 				for (int i = targetCell; i > targetCell - 3; i--)
                 {
-					System.Diagnostics.Debug.Write("targetcell > origincell. i: " + i + " targetcell: " +targetCell + " originCell: " + originCell +"\n");
+					//System.Diagnostics.Debug.Write("targetcell > origincell. i: " + i + " targetcell: " +targetCell + " originCell: " + originCell +"\n");
 					if (kingThreatened(board, targetCell, i)) return false;
                 }
 			}
@@ -679,7 +732,7 @@ namespace ChessProject
 				//System.Diagnostics.Debug.Write(targetCell + " x " + (targetCell - 3) + " ");
 				for (int i = targetCell; i < targetCell + 3; i++)
 				{
-					System.Diagnostics.Debug.Write("targetcell < origincell. i: " + i + " targetcell: " + targetCell + " originCell: " + originCell + "\n");
+					//System.Diagnostics.Debug.Write("targetcell < origincell. i: " + i + " targetcell: " + targetCell + " originCell: " + originCell + "\n");
 					if (kingThreatened(board, targetCell, i)) return false;
 				}
 			}
@@ -853,17 +906,453 @@ namespace ChessProject
         {
 			if ((board[originCell] == 38 && board[targetCell] == 40) || (board[originCell] == 28 && board[targetCell] == 30))
 			{
+				CancelEnPassant(board);
 				castleMoveSoft(board, originCell, targetCell);
 			}
             else
             {
+				if (board[originCell] == 1 || board[originCell] == 11)
+				{
+					if (board[targetCell] == 0)
+					{
+						int movement = (originCell - targetCell);
+						if (movement == 7 || movement == -9)
+						{
+							board[originCell + 1] = 0;
+						}
+						else if (movement == -7 || movement == 9)
+						{
+							board[originCell - 1] = 0;
+						}
+					}
+				}
+				CancelEnPassant(board);
+				SetupEnpassantPawn(board, originCell, targetCell);
+				checkFirstMoveByKingOrRook(board, originCell);
 				board[targetCell] = board[originCell];
 				board[originCell] = 0;
+			}
+		}
+
+		public static string BoardToFEN(int[] board, int turn)
+        {
+			string result = "";
+			bool blackKingSideRookMoved = true;
+			bool blackQueenSideRookMoved = true;
+			bool blackKingMoved = true;
+
+			bool whiteKingSideRookMoved = true;
+			bool whiteQueenSideRookMoved = true;
+			bool whiteKingMoved = true;
+
+			string enpassant = "-";
+
+			for (int i = 0; i < board.Length; i++)
+            {
+				if (i != 0 && i % 8 == 0)
+				{
+					
+					result += "/";
+				}
+
+				if (board[i] == 0)
+				{
+					//empty++;
+					//if (i != 0 && i % 8 == 0)
+					//{
+					//	result += empty + "/";
+					//	empty = 0;
+					//}
+					try
+					{
+						int lastNumber = Int32.Parse(""+result[result.Length - 1]);
+						result = result.Remove(result.Length - 1, 1);
+						result += lastNumber+1;						
+					} catch
+                    {
+						result += "1";
+                    }
+				} else {
+									
+					if (board[i] == 18 || board[i] == 38)
+					{
+						result += "r";
+						if (board[i] == 38 && i == 0) blackQueenSideRookMoved = false;
+						if (board[i] == 38 && i == 7) blackKingSideRookMoved = false;
+					}
+					else if (board[i] == 8 || board[i] == 28)
+					{
+						result += "R";
+						if (board[i] == 28 && i == 56) whiteQueenSideRookMoved = false;
+						if (board[i] == 28 && i == 63) whiteKingSideRookMoved = false;
+					}
+					else if (board[i] == 7)
+					{
+						result += "N";
+					}
+					else if (board[i] == 17)
+					{
+						result += "n";
+					}
+					else if (board[i] == 16)
+					{
+						result += "b";
+					}
+					else if (board[i] == 6)
+					{
+						result += "B";
+					}
+					else if (board[i] == 9)
+					{
+						result += "Q";
+					}
+					else if (board[i] == 19)
+					{
+						result += "q";
+					}
+					else if (board[i] == 10 || board[i] == 30)
+					{
+						result += "K";
+						if (board[i] == 30) whiteKingMoved = false;
+					}
+					else if (board[i] == 20 || board[i] == 40)
+					{
+						result += "k";
+						if (board[i] == 40) blackKingMoved = false;
+					}
+					if (board[i] == 1 || board[i] == 2)
+					{
+						result += "P";
+						if (board[i] == 2)
+						{
+							enpassant = ReturnAlphabeticalCoordinate(i + 8);
+						}
+					}
+					else if (board[i] == 11 || board[i] == 12)
+					{
+						result += "p";
+						if (board[i] == 12)
+						{
+							enpassant = ReturnAlphabeticalCoordinate(i - 8);
+						}
+					}
+				}
+			}
+
+			result += " ";
+			//section
+			result += (turn % 2 == 0) ? "w" : "b";
+
+			result += " ";
+			//section
+			if (!whiteKingMoved)
+            {
+				if (!whiteKingSideRookMoved)
+                {
+					result += "K";
+                }
+                if (!whiteQueenSideRookMoved)
+                {
+					result += "Q";
+                }
             }
+			if (!blackKingMoved)
+            {
+				if (!blackKingSideRookMoved)
+                {
+					result += "k";
+                }
+				if (!blackQueenSideRookMoved)
+                {
+					result += "q";
+                }
+            }
+			if (whiteKingMoved && blackKingMoved)
+            {
+				result += "-";
+            }
+
+			result += " ";
+			//section
+			result += enpassant;
+
+			//section half-clock pseudo
+			result += " 0";
+
+			//section fullmove number
+			result += " ";
+			result += turn/2 + 1;
+            
+
+			return result;
+        }
+
+		public static void FENToBoard(String FEN, Board board)
+        {
+			if (FEN == "") return;
+			int[] result = new int[64];
+			int index = 0;
+			int turnTotal = 0;
+			int sectionEnd = FEN.IndexOf(" ");
+			int color = 0;
+			int halfmove = 0;
+			
+		
+			for (int i = 0; i < sectionEnd; i++){
+				try
+                {
+					int numberOfEmpty = Int32.Parse(""+FEN[i]);
+					for (int j = 0; j < numberOfEmpty; j++)
+                    {
+						result[index] = 0;
+						index++;
+						
+                    }
+                }
+                catch
+                {
+					String current = ""+FEN[i];
+					if (!current.Equals("/"))
+                    {
+						if (current == "R")
+						{
+							result[index] = 8;
+						}
+						else if (current == "r")
+						{
+							result[index] = 18;
+						}
+						else if (current == "N")
+						{
+							result[index] = 7;
+						}
+						else if (current == "n")
+						{
+							result[index] = 17;
+						}
+						else if (current == "B")
+						{
+							result[index] = 6;
+						}
+						else if (current == "b")
+						{
+							result[index] = 16;
+						}
+						else if (current == "Q")
+						{
+							result[index] = 9;
+						}
+						else if (current == "q")
+						{
+							result[index] = 19;
+						}
+						else if (current == "K")
+						{
+							result[index] = 10;
+						}
+						else if (current == "k")
+						{
+							result[index] = 20;
+						} else if (current == "P")
+                        {
+							result[index] = 1;
+                        } else if (current == "p")
+                        {
+							result[index] = 11;
+                        }
+						index++;
+					}
+
+				}
+            }
+
+			if (FEN[sectionEnd+1].Equals('b'))
+            {
+				color = 1;
+            }
+			//System.Diagnostics.Debug.Write(color + " - "+ FEN[sectionEnd + 1].Equals('b') + FEN[sectionEnd+1] + " _ " + " x \n");
+
+			sectionEnd = FEN.IndexOf(" ", sectionEnd + 1);
+			int sectionStart = sectionEnd;
+			sectionEnd = FEN.IndexOf(" ", sectionEnd + 1);
+
+			for (int i = sectionStart; i < sectionEnd; i++)
+            {
+				string current = ""+FEN[i];
+				if (current == "K")
+                {
+					result[63] = 28;
+					result[60] = 30;
+                }
+				else if (current == "Q")
+                {
+					result[56] = 28;
+					result[60] = 30;
+                } else if (current == "k")
+                {
+					result[7] = 38;
+					result[4] = 40;
+                } else if (current == "q")
+                {
+					result[0] = 38;
+					result[4] = 40;
+                }
+            }
+
+			sectionStart = sectionEnd;
+			sectionEnd = FEN.IndexOf(" ", sectionEnd + 1);
+
+			if (!(FEN[sectionStart + 1]+"" == "-"))
+            {
+				string current = FEN.Substring(sectionStart + 1, 2);
+				char colChar = current[0];
+				int rowWrong = current[1];
+				try
+                {
+					rowWrong = Int32.Parse(""+current[1]);
+                } catch
+                {
+					return;
+                }
+				char[] chars = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' };
+
+				int row = Math.Abs(8 - rowWrong);
+				int col = Array.IndexOf(chars, colChar);
+				int cellIndex = row * 8 + col;
+				if (color == 0)
+                {
+					result[cellIndex + 8] = 12;
+                } else
+                {
+					result[cellIndex - 8] = 2;
+                }
+            }
+
+			sectionStart = sectionEnd;
+			sectionEnd = FEN.IndexOf(" ", sectionEnd + 1);
+			try
+            {
+				halfmove = Int32.Parse(""+FEN[sectionStart + 1]);
+            } catch
+            {
+				return;
+            }
+
+			try
+            {
+				turnTotal = Int32.Parse(FEN.Substring(sectionEnd + 1));
+            }
+            catch
+            {
+				return;
+            }
+
+			turnTotal--;
+			turnTotal = turnTotal * 2;
+
+
+			board.setBoard(result, turnTotal + color, halfmove);
+        }
+		static int[] MakeMoveSoftReturn(int[] board, int originCell, int targetCell)
+		{
+			List<int> returnArray = new List<int>();
+
+			if ((board[originCell] == 38 && board[targetCell] == 40) || (board[originCell] == 28 && board[targetCell] == 30))
+			{
+				int cancelPassant = CancelEnPassantReturn(board);
+				if (cancelPassant != -1)
+				{
+					returnArray.Add(cancelPassant);
+				}
+				castleMoveSoft(board, originCell, targetCell);
+			}
+			else
+			{
+				if (board[originCell] == 1 || board[originCell] == 11)
+				{
+					if (board[targetCell] == 0)
+					{
+						int movement = (originCell - targetCell);
+						if (movement == 7 || movement == -9)
+						{
+							board[originCell + 1] = 0;
+						}
+						else if (movement == -7 || movement == 9)
+						{
+							board[originCell - 1] = 0;
+						}
+					}
+				}
+				SetupEnpassantPawn(board, originCell, targetCell);
+				checkFirstMoveByKingOrRook(board, originCell);
+				board[targetCell] = board[originCell];
+				board[originCell] = 0;
+			}
+			return null;
+		}
+
+		public static void checkFirstMoveByKingOrRook(int[] board, int originCell)
+		{
+			if (board[originCell] == 28 || board[originCell] == 30 || board[originCell] == 38 || board[originCell] == 40)
+			{
+				board[originCell] = board[originCell] - 20;
+			}
+		}
+		static void MakeMoveSoft(int[] board, int originCell, int targetCell,  int promotion)
+		{
+			if ((board[originCell] == 38 && board[targetCell] == 40) || (board[originCell] == 28 && board[targetCell] == 30))
+			{
+				castleMoveSoft(board, originCell, targetCell);
+			}
+			else
+			{
+				if (originCell/8 == 0)
+                {
+					if (promotion == 0)
+                    {
+						board[targetCell] = 9;
+                    } else if (promotion == 1)
+                    {
+						board[targetCell] = 8;
+					}
+					else if (promotion == 2)
+					{
+						board[targetCell] = 7;
+					}
+					else if (promotion == 3)
+					{
+						board[targetCell] = 6;
+					}
+				} else if (originCell/8 == 7)
+                {
+					if (promotion == 0)
+					{
+						board[targetCell] = 19;
+					}
+					else if (promotion == 1)
+					{
+						board[targetCell] = 18;
+					}
+					else if (promotion == 2)
+					{
+						board[targetCell] = 17;
+					}
+					else if (promotion == 3)
+					{
+						board[targetCell] = 16;
+					}
+                }
+                else
+                {
+
+                }
+				board[targetCell] = board[originCell];
+				board[originCell] = 0;
+			}
 
 		}
 
-		static void UnmakeMoveSoft(int[] board, int originCell, int targetCell, int targetValue)
+		static void UnmakeMoveSoft(int[] board, int originCell, int targetCell, int targetValue, int originValue)
         {
 			if ((targetValue == 40 && (originCell == 0 || originCell == 7) ) || (targetValue == 30) && (originCell == 57 || originCell == 63) ) 
             {
@@ -874,14 +1363,31 @@ namespace ChessProject
 				board[targetCell] = targetValue;
 			}
 
+			
+
         }
 
+		static void UnmakeMoveSoft(int[] board, int originCell, int targetCell, int targetValue, int originValue, int promotion)
+		{
+
+				if (originCell/8 == 0)
+                {
+					board[originCell] = 1;
+				} else if (originCell/8 == 7)
+                {
+					board[originCell] = 11;
+                }
+				
+				board[targetCell] = targetValue;
+			
+
+		}
 		public static string ReturnAlphabeticalCoordinate(int index)
         {
-			int row = index / 8;
+			int row = 8 - index / 8;
 			int col = index - (index / 8) * 8;
 			string[] letters = { "a", "b", "c", "d", "e", "f", "g", "h" };
-			return letters[row] + col;
+			return letters[col] + row;
         }
 		public static Int64 MoveGenerationTest(int depth, int[] board, int turn)
         {
@@ -889,8 +1395,8 @@ namespace ChessProject
             {
 				return 1;
             }
-
-			int[][] movesList = new int[64][];
+			turn = turn % 2;
+			int[][] movesList;			
 
 			movesList = getAllPossibleMoves(board, turn);
 			Int64 numPositions = 0;
@@ -899,30 +1405,130 @@ namespace ChessProject
 				for (int i = 0; i < movesList.Length; i++)
 				{
 					if (movesList[i] != null)
-                    {	
-						
+                    {
+						int tempOriginValue = board[i];
+						int tempTemp = 0;
 						for (int j = 0; j < movesList[i].Length; j++)
                         {
-							
+							Int64 subcount = 0;
 							if (movesList[i][j] == -1)
                             {
+								
 								break;
                             }
-							int tempCellValue = board[movesList[i][j]];
-
-							MakeMoveSoft(board, i, movesList[i][j]);
-							numPositions += MoveGenerationTest(depth - 1, board, (turn+1)%2);
 							
-							UnmakeMoveSoft(board, i, movesList[i][j], tempCellValue);
+							//int tempCellValue = board[movesList[i][j]];
+							int[] copyBoard = new int[64];
+							Array.Copy(board, copyBoard, 64);
 
+							if ((board[i] == 1 && movesList[i][j]/8 == 0) || (board[i] == 11 && movesList[i][j]/8 == 7)){
+								MakeMoveSoft(board, i, movesList[i][j], tempTemp);
+								tempTemp++;
+								Int64 tempCount = MoveGenerationTest(depth - 1, board, (turn + 1) % 2);
+								numPositions += tempCount;
+								//UnmakeMoveSoft(board, i, movesList[i][j], tempCellValue, 0);
+								Array.Copy(copyBoard, board, 64);
+								subcount += tempCount;
+							} else
+                            {
+								MakeMoveSoft(board, i, movesList[i][j]);
+								Int64 tempCount = MoveGenerationTest(depth - 1, board, (turn + 1) % 2);
+								numPositions += tempCount;
+								//UnmakeMoveSoft(board, i, movesList[i][j], tempCellValue, tempOriginValue);
+								Array.Copy(copyBoard, board, 64);
+								subcount += tempCount;
+							}
+
+
+                            //subcount += numPositikons;
+
+
+                            //if (depth == 4) System.Diagnostics.Debug.Write(i + " - " + ReturnAlphabeticalCoordinate(i)+ReturnAlphabeticalCoordinate(movesList[i][j]) + ": " + subcount + "\n");
                         }
 						
 						
-                    }
+                    } 
 				}
+			}
+			else
+			{
+				//System.Diagnostics.Debug.Write("checkmate: " + (turn - 1) % 2 + "\n");
 			}
 			return numPositions;
         }
+
+		public static Int64 MoveGenerationTestDivide(int depth, int[] board, int turn, int originalDepth, System.Windows.Forms.TextBox textbox)
+		{
+			if (depth == 0)
+			{
+				return 1;
+			}
+
+			int[][] movesList;
+			turn = turn % 2;
+
+			movesList = getAllPossibleMoves(board, turn);
+			Int64 numPositions = 0;
+			if (movesList != null)
+			{
+				for (int i = 0; i < movesList.Length; i++)
+				{
+					if (movesList[i] != null)
+					{
+						int tempTemp = 0;
+						for (int j = 0; j < movesList[i].Length; j++)
+						{
+							Int64 subcount = 0;
+							if (movesList[i][j] == -1)
+							{
+								break;
+							}
+							int tempTargetValue = board[movesList[i][j]];
+							int tempOriginValue = board[i];
+							int[] copyBoard = new int[64];
+							Array.Copy(board, copyBoard, 64);
+							if ((board[i] == 1 && movesList[i][j] / 8 == 0) || (board[i] == 11 && movesList[i][j] / 8 == 7))
+							{
+								MakeMoveSoft(board, i, movesList[i][j], tempTemp);
+								tempTemp++;
+								Int64 tempCount = MoveGenerationTestDivide(depth - 1, board, (turn + 1) % 2, originalDepth, textbox);
+								numPositions += tempCount;
+								//UnmakeMoveSoft(board, i, movesList[i][j], tempTargetValue, tempOriginValue, 0);
+								Array.Copy(copyBoard, board, 64);
+								subcount += tempCount;
+							}
+							else
+							{
+								MakeMoveSoft(board, i, movesList[i][j]);
+								Int64 tempCount = MoveGenerationTest(depth - 1, board, (turn + 1) % 2);
+								numPositions += tempCount;
+								//UnmakeMoveSoft(board, i, movesList[i][j], tempTargetValue, tempOriginValue);
+								Array.Copy(copyBoard, board, 64);
+								subcount += tempCount;
+							}
+
+
+							//subcount += numPositikons;
+
+
+							if (depth == originalDepth) 
+							{
+								textbox.AppendText(ReturnAlphabeticalCoordinate(i) + ReturnAlphabeticalCoordinate(movesList[i][j]));
+								textbox.AppendText(": " + subcount);
+								textbox.AppendText(Environment.NewLine);
+							}
+							}
+
+
+					}
+				}
+			}
+			else
+			{
+				//System.Diagnostics.Debug.Write("checkmate: " + (turn - 1) % 2 + "\n");
+			}
+			return numPositions;
+		}
 	}
 
 

@@ -19,25 +19,41 @@ namespace ChessProject
 			this.initializeBoard();
 		}
 
-		public void initializeTestBoard()
+		public void setBoard(int[] board, int turn, int halfmove)
         {
-			board = new int[] {
-								38, 0, 0, 0, 40, 16, 17, 38,
-								11, 11, 0, 11, 11, 11, 11, 11,
-								0, 0, 0, 0, 0, 0, 0, 0,
-								0, 0, 8, 0, 0, 0, 0, 0,
-								0, 0, 0, 0, 0, 0, 0, 0,
-								0, 0, 18, 0, 0, 0, 19, 0,
-								1, 1, 0, 0, 0, 1, 0, 1,
-								28, 0, 0, 0, 30, 0, 0, 28,
-								};
+			this.board = board;
+			this.turn = turn;
 			this.selected_cell = -1;
-			this.turn = 0;
+			resetPossibleMoves();
+			this.allPossibleMoves = new int[64][];
+			this.AI_BlackON = false;
+			this.AI_WhiteON = false;
+		}
+
+		void resetPossibleMoves()
+        {
 			this.possibleMoves = new int[] {
 				-1, -1, -1, -1,-1, -1, -1, -1, -1,-1,
 				-1, -1, -1, -1,-1, -1, -1, -1, -1,-1,
 				-1, -1, -1, -1,-1, -1, -1, -1
 			};
+		}
+
+		public void initializeTestBoard()
+        {
+			board = new int[] {
+								38, 17, 16, 19, 0, 20, 0, 38,
+								11, 11, 0, 1, 16, 11, 11, 11,
+								0, 0, 11, 0, 0, 0, 0, 0,
+								0, 0, 0, 0, 0, 0, 0, 0,
+								0, 0, 6, 0, 0, 0, 0, 0,
+								0, 0, 0, 0, 0, 0, 0, 0,
+								1, 1, 1, 0, 7, 17, 1, 1,
+								28, 7, 6, 9, 30, 0, 0, 28,
+								};
+			this.selected_cell = -1;
+			this.turn = 0;
+			resetPossibleMoves();
 			this.allPossibleMoves = new int[64][];
 			this.AI_BlackON = false;
 			this.AI_WhiteON = false;
