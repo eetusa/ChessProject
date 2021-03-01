@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 
+
 namespace ChessProject
 {
     public partial class Form1 : Form
@@ -88,7 +89,7 @@ namespace ChessProject
         {
     
 			Board board = new Board();
-
+			
 			//FormBorderStyle = FormBorderStyle.None;
 			//WindowState = FormWindowState.Maximized;
 			//this.Size = new Size(1300, 1300);
@@ -133,6 +134,10 @@ namespace ChessProject
 			loadFENBtn.Click += (sender, EventArgs) =>
 			{
 				LoadFromFEN(board, cellArr);
+			};
+			copyFENBtn.Click += (sender, EventArgs) =>
+			{
+				CopyToClipboard();
 			};
 
 
@@ -215,6 +220,19 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 			printArray(board.possibleMoves, printBoxDebug);
 		}
 
+		bool CheckIfKingCastled(int[] board, int originCell, int targetCell)
+        {
+
+			if (board[originCell] == 30 || board[originCell] == 40)
+            {
+				if (targetCell == 62 || targetCell == 6 || targetCell == 2 || targetCell == 58)
+                {
+					return true;
+                }
+
+            }
+			return false;
+        }
 		void doTurn(Board board, Cell[] cells, Cell originCell, Cell targetCell, bool aiTurn) 
         {
 			if (board.allPossibleMoves == null)
@@ -223,8 +241,10 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 				return;
 			}
 			// update gamestate
-			if (( board.board[originCell.index] == 38 && board.board[targetCell.index] == 40) || (board.board[originCell.index] == 28 && board.board[targetCell.index] == 30))
+			
+			if (CheckIfKingCastled(board.board, originCell.index, targetCell.index))
             {
+				//System.Diagnostics.Debug.Write("castled \n");
 				board.possibleMoves = resetPossibleMoves(board, cells);
 				ChessAI.castleMove(board.board, originCell.index, targetCell.index, cells);
             } else
@@ -543,6 +563,11 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 			board.initializeBoard();
 			SetBoardSettings(board, cells);
 		}
+
+		void CopyToClipboard()
+        {
+			Clipboard.SetText(fenDisp.Text);
+        }
 
 
     }

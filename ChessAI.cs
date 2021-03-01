@@ -93,7 +93,30 @@ namespace ChessProject
             else return null;
         }
 
-        static int[] getPossibleMovesLow(int[] board, int originCell)
+		public static List<KeyValuePair<int, int>> GetAllPossibleMovesV2(int[] board, int color)
+		{
+
+			var list = new List<KeyValuePair<int, int>>();
+			List<int> tempArray = new List<int>();
+			
+			for (int i = 0; i < 64; i++)
+			{
+				int gotColor = getCellColor(i, board);
+				if (gotColor == color)
+				{
+					tempArray = GetPossibleMovesLowV2(board, i);
+					foreach(int move in tempArray)
+                    {
+						list.Add( new KeyValuePair<int, int>(i, move) );
+                    }
+
+
+				}
+			}
+			return list;
+		}
+
+		static int[] getPossibleMovesLow(int[] board, int originCell)
         {
             int[] moveArray =
             {
@@ -126,6 +149,30 @@ namespace ChessProject
 
             return moveArray;
         }
+
+		static List<int> GetPossibleMovesLowV2(int[] board, int originCell)
+		{
+			List<int> moveArray = new List<int>();
+
+			for (int i = 0; i < board.Length; i++)
+			{
+
+				if (legalMoveNew(board, originCell, i, 0))
+				{
+					if ((board[originCell] == 1 && (i / 8) == 0) || board[originCell] == 11 && (i / 8) == 7)
+					{
+						moveArray.Add(i);
+						moveArray.Add(i);
+						moveArray.Add(i);
+
+					}
+					moveArray.Add(i);
+				}
+
+			}
+
+			return moveArray;
+		}
 
 		public static int[][] getAllPossibleMovesBroad(int[] board)
 		{
@@ -234,6 +281,7 @@ namespace ChessProject
 
         static bool kingThreatened(int[] board, int originCell, int targetCell)
         {
+			
             int[] tempArr = new int[64];
             int whiteking = 0;
             int blackking = 0;
@@ -256,14 +304,18 @@ namespace ChessProject
                 if (tempArr[i] == 10 || tempArr[i] == 30 ) whiteking = i;
                 if (tempArr[i] == 20 || tempArr[i] == 40 ) blackking = i;
             }
+			
 
-            for (int j = 0; j < tempArr.Length; j++)
+			for (int j = 0; j < tempArr.Length; j++)
             {
                 int tempColor = getCellColor(j, board);
                 if (tempColor == 0)
                 {
-
-                    if (legalMoveNew(tempArr, j, blackking, 1))
+					if (originCell == 5 && board[originCell] == 20 && j<20)
+					{
+						//System.Diagnostics.Debug.WriteLine("target: " + targetCell + " . " + blackking + " . " + j + " = " + legalMoveNew(tempArr, j, blackking, 1));
+					}
+					if (legalMoveNew(tempArr, j, blackking, 1))
                     {
                         if (cellColor == 1) return true;
                     }
@@ -281,6 +333,7 @@ namespace ChessProject
 
 		static bool kingThreatened(int[] board, int originCell, int targetCell, bool enpassant)
 		{
+			//if (originCell == 5 && board[originCell]==20) { System.Diagnostics.Debug.WriteLine("nytx"); }
 			int[] tempArr = new int[64];
 			int whiteking = 0;
 			int blackking = 0;
@@ -394,7 +447,10 @@ namespace ChessProject
 						}
 						return true;
 					}
-				}
+				} else if ((movement == 2 || movement == -2) && (piece==30 || piece == 40))
+                {
+					return canKingCastle(board, originCell, targetCell);
+                }
 			}
 
 			// bishop
@@ -470,10 +526,10 @@ namespace ChessProject
 					}
 					return true;
 				}
-				if ((piece == 28 && board[targetCell] == 30) || (piece == 38 && board[targetCell] == 40))
-                {
-					return canRookCastle(board, originCell, targetCell);
-                }
+				//if ((piece == 28 && board[targetCell] == 30) || (piece == 38 && board[targetCell] == 40))
+    //            {
+				//	return canRookCastle(board, originCell, targetCell);
+    //            }
 			}
 
 			// queen
@@ -565,7 +621,14 @@ namespace ChessProject
 				}
 				else if (( (movement == 7 || movement == 9) && (Math.Abs((originCell / 8) - (targetCell / 8)) == 1) ) && targetOccupiedByEnemy)
 				{
-					return !kingThreatened(board, originCell, targetCell);
+					//return !kingThreatened(board, originCell, targetCell);
+					//////////
+					if (type != 1)
+					{
+						return !kingThreatened(board, originCell, targetCell);
+					}
+					return true;
+					///
 				}
 				else if (( (movement == 7 || movement == 9) && (Math.Abs((originCell / 8) - (targetCell / 8)) == 1) ) && (!targetOccupiedByEnemy))
 				{
@@ -591,8 +654,16 @@ namespace ChessProject
 				}
 				else if (((movement == -7 || movement == -9) && (Math.Abs((originCell / 8) - (targetCell / 8)) == 1)) && targetOccupiedByEnemy)
 				{
-					return !kingThreatened(board, originCell, targetCell);
-				} else if (((movement == -7 || movement == -9) && (Math.Abs((originCell / 8) - (targetCell / 8)) == 1)) && (!targetOccupiedByEnemy))
+					//return !kingThreatened(board, originCell, targetCell);
+					//////////
+					if (type != 1)
+					{
+						return !kingThreatened(board, originCell, targetCell);
+					}
+					return true;
+					///
+				}
+				else if (((movement == -7 || movement == -9) && (Math.Abs((originCell / 8) - (targetCell / 8)) == 1)) && (!targetOccupiedByEnemy))
 				{
 					return CheckEnPassant(board, originCell, targetCell, movement);
                 }
@@ -701,6 +772,46 @@ namespace ChessProject
 			return -1;
 		}
 
+		static bool canKingCastle(int[] board, int originCell, int targetCell)
+		{
+			
+			if (targetCell > originCell)
+			{
+				for (int i = originCell + 1; i < targetCell+1; i++)
+				{
+					if (board[i] != 0)
+					{
+						return false;
+					}
+				}
+				if (board[targetCell+1] != 28 && board[targetCell +1] != 38)
+                {
+					return false;
+                }
+
+				for (int i = originCell; i <= targetCell; i++)
+				{
+					if (kingThreatened(board, originCell, i)) return false;
+				}
+			}
+			else
+			{
+				for (int i = originCell - 1; i >= targetCell - 1; i--)
+				{
+					if (board[i] != 0)
+					{
+						return false;
+					}
+				}
+				for (int i = originCell; i >= targetCell; i--)
+				{
+					if (kingThreatened(board, originCell, i)) return false;
+				}
+			}
+
+			return true;
+		}
+
 		static bool canRookCastle(int[] board, int originCell, int targetCell)
         {
 			//System.Diagnostics.Debug.Write("OriginCell: " + originCell + " targetCell: " + targetCell + "\n");
@@ -739,8 +850,35 @@ namespace ChessProject
 			
 			return true;
         }
-
 		public static void castleMove(int[] board, int originCell, int targetCell, Form1.Cell[] cells)
+		{
+			if (targetCell == 6 || targetCell == 62)
+			{
+				board[targetCell] = board[originCell] - 20;
+				board[targetCell - 1] = board[targetCell+1] - 20;
+				board[originCell] = 0;
+				board[targetCell + 1 ] = 0;
+				cells[targetCell - 1].updated = false;
+				cells[targetCell + 1].updated = false;
+				cells[targetCell].updated = false;
+				cells[originCell].updated = false;
+			}
+			if (targetCell == 2 || targetCell == 58 ) // not worked
+			{
+				board[targetCell] = board[originCell] - 20;
+				board[targetCell + 1] = board[targetCell - 2] - 20;
+				board[originCell] = 0;
+				board[targetCell - 2 ] = 0;
+
+
+				cells[targetCell].updated = false;
+				cells[targetCell - 2].updated = false;
+				cells[targetCell + 1].updated = false;
+				cells[originCell].updated = false;
+			}
+		}
+
+		public static void castleMoveOld(int[] board, int originCell, int targetCell, Form1.Cell[] cells)
         {
 			if (originCell == 0 || originCell == 56)
             {
@@ -768,20 +906,20 @@ namespace ChessProject
 
 		public static void castleMoveSoft(int[] board, int originCell, int targetCell)
 		{
-			if (originCell == 0 || originCell == 56)
-			{
-				board[targetCell - 1] = board[originCell] - 20;
-				board[targetCell - 2] = board[targetCell] - 20;
-				board[originCell] = 0;
-				board[targetCell] = 0;
 
-			}
-			if (originCell == 7 || originCell == 63)
+			if (targetCell == 6 || targetCell == 62)
 			{
-				board[targetCell + 1] = board[originCell] - 20;
-				board[targetCell + 2] = board[targetCell] - 20;
+				board[targetCell] = board[originCell] - 20;
+				board[targetCell - 1] = board[targetCell + 1] - 20;
 				board[originCell] = 0;
-				board[targetCell] = 0;
+				board[targetCell + 1] = 0;
+			}
+			if (targetCell == 2 || targetCell == 58) // not worked
+			{
+				board[targetCell] = board[originCell] - 20;
+				board[targetCell + 1] = board[targetCell - 2] - 20;
+				board[originCell] = 0;
+				board[targetCell - 2] = 0;
 			}
 		}
 
@@ -904,7 +1042,8 @@ namespace ChessProject
 
 		static void MakeMoveSoft(int[] board, int originCell, int targetCell)
         {
-			if ((board[originCell] == 38 && board[targetCell] == 40) || (board[originCell] == 28 && board[targetCell] == 30))
+			int movement = (originCell - targetCell);
+			if ( (board[originCell] == 40 || board[originCell] == 30) && (movement == 2 || movement == -2) )
 			{
 				CancelEnPassant(board);
 				castleMoveSoft(board, originCell, targetCell);
@@ -915,7 +1054,7 @@ namespace ChessProject
 				{
 					if (board[targetCell] == 0)
 					{
-						int movement = (originCell - targetCell);
+						
 						if (movement == 7 || movement == -9)
 						{
 							board[originCell + 1] = 0;
@@ -1300,13 +1439,9 @@ namespace ChessProject
 		}
 		static void MakeMoveSoft(int[] board, int originCell, int targetCell,  int promotion)
 		{
-			if ((board[originCell] == 38 && board[targetCell] == 40) || (board[originCell] == 28 && board[targetCell] == 30))
-			{
-				castleMoveSoft(board, originCell, targetCell);
-			}
-			else
-			{
-				if (originCell/8 == 0)
+			
+				
+				if (originCell/8 == 1)
                 {
 					if (promotion == 0)
                     {
@@ -1317,13 +1452,13 @@ namespace ChessProject
 					}
 					else if (promotion == 2)
 					{
-						board[targetCell] = 7;
+						board[targetCell] = 6;
 					}
 					else if (promotion == 3)
 					{
-						board[targetCell] = 6;
+						board[targetCell] = 7;
 					}
-				} else if (originCell/8 == 7)
+				} else if (originCell/8 == 6)
                 {
 					if (promotion == 0)
 					{
@@ -1335,20 +1470,21 @@ namespace ChessProject
 					}
 					else if (promotion == 2)
 					{
-						board[targetCell] = 17;
+						board[targetCell] = 16;
 					}
 					else if (promotion == 3)
 					{
-						board[targetCell] = 16;
+						board[targetCell] = 17;
 					}
                 }
                 else
                 {
-
-                }
-				board[targetCell] = board[originCell];
+					board[targetCell] = board[originCell];
+					
+				}
 				board[originCell] = 0;
-			}
+
+			
 
 		}
 
@@ -1457,7 +1593,58 @@ namespace ChessProject
 			return numPositions;
         }
 
-		public static Int64 MoveGenerationTestDivide(int depth, int[] board, int turn, int originalDepth, System.Windows.Forms.TextBox textbox)
+		public static Int64 MoveGenerationTestBulk(int depth, int[] board, int turn)
+		{
+
+			turn = turn % 2;
+			List<KeyValuePair<int, int>> movesList;
+			
+
+			movesList = GetAllPossibleMovesV2(board, turn);
+			if (movesList == null) return 0;
+			int moveCount = movesList.Count();
+			
+			
+			if (depth == 1)
+			{
+				return moveCount;
+				
+			}
+			Int64 numPositions = 0;
+			if (movesList != null)
+			{
+				foreach (KeyValuePair<int,int> move in movesList)
+                {
+					int tempTemp = 0;
+					Int64 subcount = 0;
+					int[] copyBoard = new int[64];
+					Array.Copy(board, copyBoard, 64);
+
+
+					if ((board[move.Key] == 1 && move.Value / 8 == 0) || (board[move.Key] == 11 && move.Value / 8 == 7))
+					{
+						MakeMoveSoft(board, move.Key, move.Value, tempTemp);
+						tempTemp++;
+						Int64 tempCount = MoveGenerationTest(depth - 1, board, (turn + 1) % 2);
+						numPositions += tempCount;
+						Array.Copy(copyBoard, board, 64);
+						subcount += tempCount;
+					}
+					else
+					{
+						MakeMoveSoft(board, move.Key, move.Value);
+						Int64 tempCount = MoveGenerationTest(depth - 1, board, (turn + 1) % 2);
+						numPositions += tempCount;
+						Array.Copy(copyBoard, board, 64);
+						subcount += tempCount;
+					}
+
+				}
+			}
+			return numPositions;
+		}
+
+		public static Int64 MoveGenerationTestDivide(int depth, int[] board, int turn, int originalDepth, Dictionary<string, Int64> perftResults)
 		{
 			if (depth == 0)
 			{
@@ -1467,8 +1654,11 @@ namespace ChessProject
 			int[][] movesList;
 			turn = turn % 2;
 
+			List<string> promotionMoves = new List<string>();
+
 			movesList = getAllPossibleMoves(board, turn);
 			Int64 numPositions = 0;
+
 			if (movesList != null)
 			{
 				for (int i = 0; i < movesList.Length; i++)
@@ -1490,8 +1680,9 @@ namespace ChessProject
 							if ((board[i] == 1 && movesList[i][j] / 8 == 0) || (board[i] == 11 && movesList[i][j] / 8 == 7))
 							{
 								MakeMoveSoft(board, i, movesList[i][j], tempTemp);
+								//System.Diagnostics.Debug.WriteLine(copyBoard[i] + " to " + board[movesList[i][j]]);
 								tempTemp++;
-								Int64 tempCount = MoveGenerationTestDivide(depth - 1, board, (turn + 1) % 2, originalDepth, textbox);
+								Int64 tempCount = MoveGenerationTestDivide(depth - 1, board, (turn + 1) % 2, originalDepth, perftResults);
 								numPositions += tempCount;
 								//UnmakeMoveSoft(board, i, movesList[i][j], tempTargetValue, tempOriginValue, 0);
 								Array.Copy(copyBoard, board, 64);
@@ -1499,6 +1690,7 @@ namespace ChessProject
 							}
 							else
 							{
+								//System.Diagnostics.Debug.WriteLine(i + " " + movesList[i][j] );
 								MakeMoveSoft(board, i, movesList[i][j]);
 								Int64 tempCount = MoveGenerationTest(depth - 1, board, (turn + 1) % 2);
 								numPositions += tempCount;
@@ -1513,10 +1705,40 @@ namespace ChessProject
 
 							if (depth == originalDepth) 
 							{
-								textbox.AppendText(ReturnAlphabeticalCoordinate(i) + ReturnAlphabeticalCoordinate(movesList[i][j]));
-								textbox.AppendText(": " + subcount);
-								textbox.AppendText(Environment.NewLine);
-							}
+                                string str = ReturnAlphabeticalCoordinate(i) + ReturnAlphabeticalCoordinate(movesList[i][j]);
+                                if (perftResults.ContainsKey(str))
+                                {
+                                    
+
+
+                                    if (!perftResults.ContainsKey(str + "r"))
+                                    {
+                                        perftResults.Add(str + "r", subcount);
+                                    }
+                                    else if (!perftResults.ContainsKey(str + "b"))
+                                    {
+                                        perftResults.Add(str + "b", subcount);
+                                    }
+                                    else if (!perftResults.ContainsKey(str + "n"))
+                                    {
+                                        perftResults.Add(str + "n", subcount);
+										perftResults.Add(str + "q", perftResults[str]);
+										perftResults.Remove(str);
+                                    }
+
+                                }
+                                else
+                                {
+                                    perftResults.Add(str, subcount);
+                                }
+
+
+
+
+                                //textbox.AppendText(ReturnAlphabeticalCoordinate(i) + ReturnAlphabeticalCoordinate(movesList[i][j]));
+                                //textbox.AppendText(": " + subcount);
+                                //textbox.AppendText(Environment.NewLine);
+                            }
 							}
 
 
