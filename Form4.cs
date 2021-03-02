@@ -70,7 +70,7 @@ namespace ChessProject
                     ownResults.Add(ownPerftResult);
                     if (!compareStockfishBtn.Checked)
                     {
-                        textBox1.AppendText("Depth: " + depth + "  Nodes: " + result + "  Time: " + sw.Elapsed);
+                        textBox1.AppendText("Depth: " + i + "  Nodes: " + result + "  Time: " + sw.Elapsed);
                         textBox1.AppendText(Environment.NewLine);
                     }
                 }
@@ -109,7 +109,7 @@ namespace ChessProject
                     {
                         if (ownPerftResult[entry.Key] != entry.Value)
                         {
-                            ComparisonDisplay.AppendText(entry.Key + " " + ownPerftResult[entry.Key] + " - " + entry.Value);
+                            ComparisonDisplay.AppendText(entry.Key + " " + ownPerftResult[entry.Key] + " - stock " + entry.Value);
                             ComparisonDisplay.AppendText(Environment.NewLine);
                         }
                     }

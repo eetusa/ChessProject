@@ -1040,38 +1040,7 @@ namespace ChessProject
 			return false;
 		}
 
-		static void MakeMoveSoft(int[] board, int originCell, int targetCell)
-        {
-			int movement = (originCell - targetCell);
-			if ( (board[originCell] == 40 || board[originCell] == 30) && (movement == 2 || movement == -2) )
-			{
-				CancelEnPassant(board);
-				castleMoveSoft(board, originCell, targetCell);
-			}
-            else
-            {
-				if (board[originCell] == 1 || board[originCell] == 11)
-				{
-					if (board[targetCell] == 0)
-					{
-						
-						if (movement == 7 || movement == -9)
-						{
-							board[originCell + 1] = 0;
-						}
-						else if (movement == -7 || movement == 9)
-						{
-							board[originCell - 1] = 0;
-						}
-					}
-				}
-				CancelEnPassant(board);
-				SetupEnpassantPawn(board, originCell, targetCell);
-				checkFirstMoveByKingOrRook(board, originCell);
-				board[targetCell] = board[originCell];
-				board[originCell] = 0;
-			}
-		}
+
 
 		public static string BoardToFEN(int[] board, int turn)
         {
@@ -1437,42 +1406,75 @@ namespace ChessProject
 				board[originCell] = board[originCell] - 20;
 			}
 		}
+		static void MakeMoveSoft(int[] board, int originCell, int targetCell)
+		{
+			int movement = (originCell - targetCell);
+			if ((board[originCell] == 40 || board[originCell] == 30) && (movement == 2 || movement == -2))
+			{
+				CancelEnPassant(board);
+				castleMoveSoft(board, originCell, targetCell);
+			}
+			else
+			{
+				if (board[originCell] == 1 || board[originCell] == 11)
+				{
+					if (board[targetCell] == 0)
+					{
+
+						if (movement == 7 || movement == -9)
+						{
+							board[originCell + 1] = 0;
+						}
+						else if (movement == -7 || movement == 9)
+						{
+							board[originCell - 1] = 0;
+						}
+					}
+				}
+				CancelEnPassant(board);
+				SetupEnpassantPawn(board, originCell, targetCell);
+				checkFirstMoveByKingOrRook(board, originCell);
+				board[targetCell] = board[originCell];
+				board[originCell] = 0;
+			}
+		}
+
 		static void MakeMoveSoft(int[] board, int originCell, int targetCell,  int promotion)
 		{
-			
-				
-				if (originCell/8 == 1)
+
+			CancelEnPassant(board);
+			if (originCell/8 == 1)
                 {
-					if (promotion == 0)
+					if (promotion%4 == 0)
                     {
 						board[targetCell] = 9;
-                    } else if (promotion == 1)
+                    } else if (promotion % 4 == 1)
                     {
 						board[targetCell] = 8;
 					}
-					else if (promotion == 2)
+					else if (promotion % 4 == 2)
 					{
 						board[targetCell] = 6;
 					}
-					else if (promotion == 3)
+					else if (promotion % 4 == 3)
 					{
 						board[targetCell] = 7;
 					}
 				} else if (originCell/8 == 6)
                 {
-					if (promotion == 0)
+					if (promotion % 4 == 0)
 					{
 						board[targetCell] = 19;
 					}
-					else if (promotion == 1)
+					else if (promotion % 4 == 1)
 					{
 						board[targetCell] = 18;
 					}
-					else if (promotion == 2)
+					else if (promotion % 4 == 2)
 					{
 						board[targetCell] = 16;
 					}
-					else if (promotion == 3)
+					else if (promotion % 4 == 3)
 					{
 						board[targetCell] = 17;
 					}
@@ -1484,7 +1486,7 @@ namespace ChessProject
 				}
 				board[originCell] = 0;
 
-			
+			System.Diagnostics.Debug.WriteLine(board[originCell] + " - " + board[targetCell]);
 
 		}
 
@@ -1626,6 +1628,7 @@ namespace ChessProject
 						MakeMoveSoft(board, move.Key, move.Value, tempTemp);
 						tempTemp++;
 						Int64 tempCount = MoveGenerationTest(depth - 1, board, (turn + 1) % 2);
+						
 						numPositions += tempCount;
 						Array.Copy(copyBoard, board, 64);
 						subcount += tempCount;
@@ -1680,11 +1683,11 @@ namespace ChessProject
 							if ((board[i] == 1 && movesList[i][j] / 8 == 0) || (board[i] == 11 && movesList[i][j] / 8 == 7))
 							{
 								MakeMoveSoft(board, i, movesList[i][j], tempTemp);
-								//System.Diagnostics.Debug.WriteLine(copyBoard[i] + " to " + board[movesList[i][j]]);
 								tempTemp++;
+								System.Diagnostics.Debug.WriteLine(board[movesList[i][j]] + " < > " + board[i] + " < > " + i + " < > " + movesList[i][j]);
 								Int64 tempCount = MoveGenerationTestDivide(depth - 1, board, (turn + 1) % 2, originalDepth, perftResults);
 								numPositions += tempCount;
-								//UnmakeMoveSoft(board, i, movesList[i][j], tempTargetValue, tempOriginValue, 0);
+								
 								Array.Copy(copyBoard, board, 64);
 								subcount += tempCount;
 							}
