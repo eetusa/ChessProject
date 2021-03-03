@@ -9,60 +9,86 @@ namespace ChessProject
 {
     public static class ChessAI
     {
+		const int pawnValue = 100;
+		const int knightValue = 300;
+		const int bishopValue = 300;
+		const int rookvalue = 500;
+		const int queenValue = 900;
+
         public static int[] AITurn(Board Cboard)
         {
             int turn = Cboard.turn;
             int[] board = Cboard.board;
 
-            return randomMove(board, turn, Cboard.allPossibleMoves);
+            return randomMove(Cboard);
+        }
+		static int CountMaterial (int color)
+        {
+			int material = 0;
+			return material;
+
+        }
+		static int Evaluate()
+        {
+			return 0;
         }
 
-		static int[] minimax(int[] board, int turn, int[][] allMoves, int depth)
+		static int minimax(int[] board, int depth, int maximizingPlayer)
         {
-			if (depth == 0 || allMoves == null)
+			if (depth == 0)
             {
-				return null;
+				return 0;
             }
-			return null;
+			return 0;
         }
 
-		static int[] randomMove(int[] board, int turn, int[][] allMoves)
+		static int[] randomMove(Board board)
         {
-			int availPieces = 0;
-			if (allMoves == null) return null;
-			for (int i = 0; i < board.Length; i++)
-            {
-				if (getCellColor(i, board) == turn % 2 && allMoves[i] != null)
-				{
-					availPieces++;
-				}
-			}
-			int[] avaivablePieces = new int[availPieces];
-			int temp = 0;
-			for (int i = 0; i < board.Length; i++)
-            {
-				if (getCellColor(i, board) == turn % 2 && allMoves[i]!=null)
-                {
-					avaivablePieces[temp] = i;
-					temp++;
-                }
-            }
+			//int availPieces = 0;
+			//List<int> allMoves = new List<int>();
+			//foreach (KeyValuePair<int,int> move in board.allPossibleMovesKV)
+   //         {
+			//	if (getCellColor(move.Key, board.board) == board.turn % 2){
+			//		allMoves.Add(move.Value);
+   //             }
+   //         }
+			//if (allMoves == null) return null;
+			//for (int i = 0; i < board.Length; i++)
+   //         {
+			//	if (getCellColor(i, board) == turn % 2 && allMoves[i] != null)
+			//	{
+			//		availPieces++;
+			//	}
+			//}
+			//int[] avaivablePieces = new int[availPieces];
+			//int temp = 0;
+			//for (int i = 0; i < board.Length; i++)
+   //         {
+			//	if (getCellColor(i, board) == turn % 2 && allMoves[i]!=null)
+   //             {
+			//		avaivablePieces[temp] = i;
+			//		temp++;
+   //             }
+   //         }
 
-			if (avaivablePieces[0] == -1) return null;
+			//if (avaivablePieces[0] == -1) return null;
 
 			Random rand = new Random();
 			
-			int pieceIndex = avaivablePieces[rand.Next(0, avaivablePieces.Length)];
+			//int pieceIndex = avaivablePieces[rand.Next(0, avaivablePieces.Length)];
 			
-			int[] moves = allMoves[pieceIndex];
-			int pituus = 0;
-			for (int j = 0; j < moves.Length; j++)
-            {
-				if (moves[j] == -1) break;
-				pituus++;
-            }
-			int moveIndex = rand.Next(0, pituus);
-			int[] result = { pieceIndex, moves[moveIndex] };
+			//int[] moves = allMoves[pieceIndex];
+			//int pituus = 0;
+			//for (int j = 0; j < moves.Length; j++)
+   //         {
+			//	if (moves[j] == -1) break;
+			//	pituus++;
+   //         }
+			int moveIndex = rand.Next(0, board.allPossibleMovesKV.Count);
+			//int[] result = { pieceIndex, moves[moveIndex] };
+			int origin = board.allPossibleMovesKV[moveIndex].Key;
+			int target = board.allPossibleMovesKV[moveIndex].Value;
+			int[] result = { origin, target };
 
 			return result;
         }
@@ -93,6 +119,50 @@ namespace ChessProject
             else return null;
         }
 
+		public static List<KeyValuePair<int, int>> getAllPossibleMovesLowV2(Board boardC, int color)
+		{
+			var list = new List<KeyValuePair<int, int>>();
+			List<int> tempArray;
+			int[] board = boardC.board;
+
+			if (color == 0)
+            {
+				foreach (List<int> pieces in boardC.whitePieces)
+                {
+					foreach (int piece in pieces)
+                    {
+						tempArray = GetPossibleMovesLowV2(board, piece);
+						
+						if (tempArray != null)
+                        {
+							foreach (int move in tempArray)
+                            {
+								list.Add(new KeyValuePair<int, int>(piece, move));
+							}
+							
+                        }
+					}
+                }
+            } else
+            {
+				foreach (List<int> pieces in boardC.blackPieces	)
+				{
+					foreach (int piece in pieces)
+					{
+						tempArray = GetPossibleMovesLowV2(board, piece);
+						if (tempArray != null)
+						{
+							foreach (int move in tempArray)
+							{
+								list.Add(new KeyValuePair<int, int>(piece, move));
+							}
+						}
+					}
+				}
+			}
+
+			return list;
+		}
 		public static List<KeyValuePair<int, int>> GetAllPossibleMovesV2(int[] board, int color)
 		{
 
@@ -757,6 +827,7 @@ namespace ChessProject
 			}
 			return -1;
 		}
+		
 		public static int getCellColor(int cellIndex, int[] board)
 		{
 			int cellContentInt = board[cellIndex];
@@ -850,6 +921,7 @@ namespace ChessProject
 			
 			return true;
         }
+
 		public static void castleMove(int[] board, int originCell, int targetCell, Form1.Cell[] cells)
 		{
 			if (targetCell == 6 || targetCell == 62)
@@ -920,6 +992,31 @@ namespace ChessProject
 				board[targetCell + 1] = board[targetCell - 2] - 20;
 				board[originCell] = 0;
 				board[targetCell - 2] = 0;
+
+			}
+		}
+
+		public static void castleMoveSoft(Board boardC, int originCell, int targetCell)
+		{
+			int[] board = boardC.board;
+
+			if (targetCell == 6 || targetCell == 62)
+			{
+				board[targetCell] = board[originCell] - 20;
+				board[targetCell - 1] = board[targetCell + 1] - 20;
+				board[originCell] = 0;
+				board[targetCell + 1] = 0;
+				UpgradePieceLists(boardC, originCell, targetCell);
+				UpgradePieceLists(boardC, targetCell + 1, targetCell - 1);
+			}
+			if (targetCell == 2 || targetCell == 58) 
+			{
+				board[targetCell] = board[originCell] - 20;
+				board[targetCell + 1] = board[targetCell - 2] - 20;
+				board[originCell] = 0;
+				board[targetCell - 2] = 0;
+				UpgradePieceLists(boardC, originCell, targetCell);
+				UpgradePieceLists(boardC, targetCell - 2, targetCell + 1);
 			}
 		}
 
@@ -1039,8 +1136,6 @@ namespace ChessProject
 
 			return false;
 		}
-
-
 
 		public static string BoardToFEN(int[] board, int turn)
         {
@@ -1361,6 +1456,7 @@ namespace ChessProject
 
 			board.setBoard(result, turnTotal + color, halfmove);
         }
+
 		static int[] MakeMoveSoftReturn(int[] board, int originCell, int targetCell)
 		{
 			List<int> returnArray = new List<int>();
@@ -1406,7 +1502,117 @@ namespace ChessProject
 				board[originCell] = board[originCell] - 20;
 			}
 		}
-		static void MakeMoveSoft(int[] board, int originCell, int targetCell)
+
+		static void UpgradePieceLists(Board boardC, int originIndex, int newIndex)
+        {
+			int[] board = boardC.board;
+			List<int> targetList = new List<int>();
+			if (board[originIndex] == 1 || board[originIndex] == 2)
+            {
+				targetList = boardC.pawns[0];
+			} 
+			else if (board[originIndex] == 11 || board[originIndex] == 12)
+            {
+				targetList = boardC.pawns[1];
+			} 
+			else if (board[originIndex] == 6)
+            {
+				targetList = boardC.bishops[0];
+            }
+			else if (board[originIndex] == 16)
+			{
+				targetList = boardC.bishops[1];
+			}
+			else if (board[originIndex] == 7)
+			{
+				targetList = boardC.knights[0];
+			}
+			else if (board[originIndex] == 17)
+			{
+				targetList = boardC.knights[1];
+			}
+			else if (board[originIndex] == 18 || board[originIndex] == 38)
+			{
+				targetList = boardC.rooks[1];
+			}
+			else if (board[originIndex] == 8 || board[originIndex] == 28)
+			{
+				targetList = boardC.rooks[0];
+			}
+			else if (board[originIndex] == 9)
+			{
+				targetList = boardC.queens[0];
+			}
+			else if (board[originIndex] == 19)
+			{
+				targetList = boardC.queens[1];
+			}
+			else if (board[originIndex] == 10 || board[originIndex] == 30)
+			{
+				targetList = boardC.kings[0];
+			}
+			else if (board[originIndex] == 20 || board[originIndex] == 40)
+			{
+				targetList = boardC.kings[1];
+			}
+
+
+			if (targetList != null)
+            {
+				UpgradePiece(targetList, originIndex, newIndex);
+			}
+			
+		}
+
+		static void UpgradePiece(List<int> piece, int originIndex, int newIndex)
+        {
+			piece.Remove(originIndex);
+			if (newIndex != -1)
+            {
+				piece.Add(newIndex);
+            }
+
+        }
+		public static void MakeMoveSoft(Board boardC, int originCell, int targetCell)
+		{
+			int[] board = boardC.board;
+			int movement = (originCell - targetCell);
+
+			if ((board[originCell] == 40 || board[originCell] == 30) && (movement == 2 || movement == -2))
+			{
+				CancelEnPassant(board);
+				castleMoveSoft(board, originCell, targetCell);
+				// upgrade piecelist done in castlemovesoft
+			}
+			else
+			{
+				if (board[originCell] == 1 || board[originCell] == 11)
+				{
+					if (board[targetCell] == 0)
+					{
+
+						if (movement == 7 || movement == -9)
+						{
+							board[originCell + 1] = 0;
+							UpgradePieceLists(boardC, originCell + 1, -1);
+						}
+						else if (movement == -7 || movement == 9)
+						{
+							board[originCell - 1] = 0;
+							UpgradePieceLists(boardC, originCell - 1, -1);
+						}
+					}
+				}
+				CancelEnPassant(board);
+				SetupEnpassantPawn(board, originCell, targetCell);
+				checkFirstMoveByKingOrRook(board, originCell);
+				UpgradePieceLists(boardC, originCell, targetCell);
+				UpgradePieceLists(boardC, targetCell, -1);
+				board[targetCell] = board[originCell];
+				board[originCell] = 0;
+			}
+		}
+		public static void MakeMoveSoft(int[] board, int originCell, int targetCell)
 		{
 			int movement = (originCell - targetCell);
 			if ((board[originCell] == 40 || board[originCell] == 30) && (movement == 2 || movement == -2))
@@ -1520,6 +1726,7 @@ namespace ChessProject
 			
 
 		}
+
 		public static string ReturnAlphabeticalCoordinate(int index)
         {
 			int row = 8 - index / 8;
@@ -1527,6 +1734,7 @@ namespace ChessProject
 			string[] letters = { "a", "b", "c", "d", "e", "f", "g", "h" };
 			return letters[col] + row;
         }
+
 		public static Int64 MoveGenerationTest(int depth, int[] board, int turn)
         {
 			if (depth == 0)
@@ -1551,11 +1759,9 @@ namespace ChessProject
 							Int64 subcount = 0;
 							if (movesList[i][j] == -1)
                             {
-								
 								break;
                             }
 							
-							//int tempCellValue = board[movesList[i][j]];
 							int[] copyBoard = new int[64];
 							Array.Copy(board, copyBoard, 64);
 
@@ -1564,7 +1770,6 @@ namespace ChessProject
 								tempTemp++;
 								Int64 tempCount = MoveGenerationTest(depth - 1, board, (turn + 1) % 2);
 								numPositions += tempCount;
-								//UnmakeMoveSoft(board, i, movesList[i][j], tempCellValue, 0);
 								Array.Copy(copyBoard, board, 64);
 								subcount += tempCount;
 							} else
@@ -1572,25 +1777,12 @@ namespace ChessProject
 								MakeMoveSoft(board, i, movesList[i][j]);
 								Int64 tempCount = MoveGenerationTest(depth - 1, board, (turn + 1) % 2);
 								numPositions += tempCount;
-								//UnmakeMoveSoft(board, i, movesList[i][j], tempCellValue, tempOriginValue);
 								Array.Copy(copyBoard, board, 64);
 								subcount += tempCount;
 							}
-
-
-                            //subcount += numPositikons;
-
-
-                            //if (depth == 4) System.Diagnostics.Debug.Write(i + " - " + ReturnAlphabeticalCoordinate(i)+ReturnAlphabeticalCoordinate(movesList[i][j]) + ": " + subcount + "\n");
-                        }
-						
-						
+						}
                     } 
 				}
-			}
-			else
-			{
-				//System.Diagnostics.Debug.Write("checkmate: " + (turn - 1) % 2 + "\n");
 			}
 			return numPositions;
         }
@@ -1758,298 +1950,3 @@ namespace ChessProject
 
 
 }
-
-
-
-
-//bool kingThreatened (int[] board, int originCell, int targetCell)
-//      {
-//	int[] tempArr = new int[64];
-//	int whiteking = 0;
-//	int blackking = 0;
-
-//	for (int i=0; i < board.Length; i++)
-//          {
-//		tempArr[i] = board[i];
-//          }
-
-//	int cellColor = getCellColor(originCell, board);
-//	tempArr[targetCell] = tempArr[originCell];
-//	tempArr[originCell] = 0;
-
-//	for (int i = 0; i < board.Length; i++)
-//	{
-//		if (tempArr[i] == 10) whiteking = i;
-//		if (tempArr[i] == 20) blackking = i;
-//	}
-
-//	for (int j = 0; j < tempArr.Length; j++)
-//          {
-//		int tempColor = getCellColor(j, board);
-//		if (tempColor == 0)
-//              {
-
-//			if (legalMoveNew(tempArr, j, blackking, 1))
-//                  {
-//				if (cellColor == 1) return true;
-//                  }
-//              } else if (tempColor == 1)
-//              {
-//			if (legalMoveNew(tempArr, j, whiteking, 1))
-//			{
-//				if (cellColor == 0) return true;
-//			}
-//		}
-//	}
-//	return false;
-//      }
-
-//// to fix: pawn changes rank, rook castles
-//// get all possible moves after movement. compare shit against that until moved
-//bool legalMoveNew(int[] board, int originCell, int targetCell, int type)
-//      {
-//	int piece = board[originCell];
-//	bool targetOccupied = board[targetCell] != 0 ? true : false;
-//	bool targetOccupiedByEnemy = ((getCellColor(originCell, board) != getCellColor(targetCell, board)) && getCellColor(targetCell, board) != -1) ? true : false;
-//	int movement = originCell - targetCell;
-
-//	// knight
-//	if (piece == 7 || piece == 17)
-//          {
-//		int rowdif = Math.Abs((originCell / 8) - (targetCell / 8));
-//		if ((movement == -17 || movement == -15 || movement == 17 || movement == 15) && rowdif == 2)
-//              {
-//			if (targetOccupiedByEnemy || !targetOccupied)
-//			{
-//				if (type != 1)
-//				{
-//					return !kingThreatened(board, originCell, targetCell);
-//				}
-
-//				return true;
-//			}
-//		}
-//		if ( (movement == -6 || movement == -10 || movement == 6 || movement == 10) && rowdif == 1)
-//              {
-//			if (targetOccupiedByEnemy || !targetOccupied)
-//			{
-//				if (type != 1)
-//				{
-//					return !kingThreatened(board, originCell, targetCell);
-//				}
-
-//				return true;
-//			}
-//		}
-//	}
-
-//	// king
-//	if (piece == 10 || piece == 20)
-//          {
-//		int rowdif = Math.Abs((originCell / 8) - (targetCell / 8));
-//		if (movement == 1 || movement == -1)
-//              {
-//			if (rowdif != 0) return false;
-//			if (targetOccupiedByEnemy || !targetOccupied)
-//                  {
-//				if (type != 1)
-//                      {
-//					return !kingThreatened(board, originCell, targetCell);
-//				}
-
-//				return true;
-//                  }
-//              } else if (( movement == 7 || movement == 8 || movement == 9 || movement == -7 || movement == -8 || movement == -9 ) && rowdif == 1)
-//              {
-//			if ( targetOccupiedByEnemy || !targetOccupied )
-//			{
-//				if (type != 1)
-//				{
-//					return !kingThreatened(board, originCell, targetCell);
-//				}
-//				return true;
-//			}
-//		}
-//          }
-
-//	// bishop
-//	if (piece == 6 || piece == 16)
-//	{
-//		if (checkStraightMovement(board, originCell, targetCell, -7))
-//              {
-//			if (type != 1)
-//			{
-//				return !kingThreatened(board, originCell, targetCell);
-//			}
-//			return true;
-//		}
-//		if (checkStraightMovement(board, originCell, targetCell, -9))
-//		{
-//			if (type != 1)
-//			{
-//				return !kingThreatened(board, originCell, targetCell);
-//			}
-//			return true;
-
-//		}
-//		if (checkStraightMovement(board, originCell, targetCell, 7))
-//		{
-//			if (type != 1)
-//			{
-//				return !kingThreatened(board, originCell, targetCell);
-//			}
-//			return true;
-//		}
-//		if (checkStraightMovement(board, originCell, targetCell, 9))
-//		{
-//			if (type != 1)
-//			{
-//				return !kingThreatened(board, originCell, targetCell);
-//			}
-//			return true;
-//		}
-//	}
-
-//	// rook
-//	if (piece == 8 || piece == 18)
-//	{
-//		if (checkStraightMovement(board, originCell, targetCell, -1))
-//		{
-//			if (type != 1)
-//			{
-//				return !kingThreatened(board, originCell, targetCell);
-//			}
-//			return true;
-//		}
-//		if (checkStraightMovement(board, originCell, targetCell, -8))
-//		{
-//			if (type != 1)
-//			{
-//				return !kingThreatened(board, originCell, targetCell);
-//			}
-//			return true;
-//		}
-//		if (checkStraightMovement(board, originCell, targetCell, 1))
-//		{
-//			if (type != 1)
-//			{
-//				return !kingThreatened(board, originCell, targetCell);
-//			}
-//			return true;
-//		}
-//		if (checkStraightMovement(board, originCell, targetCell, 8))
-//		{
-//			if (type != 1)
-//			{
-//				return !kingThreatened(board, originCell, targetCell);
-//			}
-//			return true;
-//		}
-//	}
-
-//	// queen
-//	if (piece == 9 || piece == 19)
-//	{
-//		if (checkStraightMovement(board, originCell, targetCell, -7))
-//		{
-//			if (type != 1)
-//			{
-//				return !kingThreatened(board, originCell, targetCell);
-//			}
-//			return true;
-//		}
-//		if (checkStraightMovement(board, originCell, targetCell, -9))
-//		{
-//			if (type != 1)
-//			{
-//				return !kingThreatened(board, originCell, targetCell);
-//			}
-//			return true;
-//		}
-//		if (checkStraightMovement(board, originCell, targetCell, 7))
-//		{
-//			if (type != 1)
-//			{
-//				return !kingThreatened(board, originCell, targetCell);
-//			}
-//			return true;
-//		}
-//		if (checkStraightMovement(board, originCell, targetCell, 9))
-//		{
-//			if (type != 1)
-//			{
-//				return !kingThreatened(board, originCell, targetCell);
-//			}
-//			return true;
-//		}
-//		if (checkStraightMovement(board, originCell, targetCell, -1))
-//		{
-//			if (type != 1)
-//			{
-//				return !kingThreatened(board, originCell, targetCell);
-//			}
-//			return true;
-//		}
-//		if (checkStraightMovement(board, originCell, targetCell, -8))
-//		{
-//			if (type != 1)
-//			{
-//				return !kingThreatened(board, originCell, targetCell);
-//			}
-//			return true;
-//		}
-//		if (checkStraightMovement(board, originCell, targetCell, 1))
-//		{
-//			if (type != 1)
-//			{
-//				return !kingThreatened(board, originCell, targetCell);
-//			}
-//			return true;
-//		}
-//		if (checkStraightMovement(board, originCell, targetCell, 8))
-//		{
-//			if (type != 1)
-//			{
-//				return !kingThreatened(board, originCell, targetCell);
-//			}
-//			return true;
-//		}
-//	}
-
-//	// white pawn
-//	if (piece == 1)
-//	{
-//		if (movement == 8 && !targetOccupied && type != 1)
-//		{
-//			return !kingThreatened(board, originCell, targetCell);
-//		}
-//		else if (movement == 16 && originCell / 8 == 6 && !targetOccupied && type != 1)
-//		{
-//			return !kingThreatened(board, originCell, targetCell);
-//		}
-//		else if ((movement == 7 || movement == 9) && targetOccupiedByEnemy)
-//		{
-//			return !kingThreatened(board, originCell, targetCell);
-//		}
-//	}
-
-//	// black pawn
-//	if (piece == 11)
-//	{
-//		if (movement == -8 && !targetOccupied && type != 1)
-//		{
-//			return !kingThreatened(board, originCell, targetCell);
-//		}
-//		else if (movement == -16 && originCell/8 == 1 && !targetOccupied  && type != 1)
-//		{
-//			return !kingThreatened(board, originCell, targetCell);
-//		}
-//		else if ((movement == -7 || movement == -9) && (targetOccupiedByEnemy))
-//		{
-//			return !kingThreatened(board, originCell, targetCell);
-//		}
-//	}
-
-
-//	return false;
-//      }

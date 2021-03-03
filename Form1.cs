@@ -40,7 +40,7 @@ namespace ChessProject
 		}
 
 
-		private TableLayoutPanel GetBoard(Board board, Cell[] test_cells)
+		private TableLayoutPanel GetBoard(Board board)
 		{
 			TableLayoutPanel b = new TableLayoutPanel();
 			b.ColumnCount = 8;
@@ -64,12 +64,15 @@ namespace ChessProject
 				{
 					Cell cell = new Cell(row, col);
 					cell.Click += delegate (object s, EventArgs e) {
-						cell_Click(s, board, b, test_cells);
+						cell_Click(s, board, b);
 					};
 
 
 					b.Controls.Add(cell, col, row);
-					test_cells[ii] = cell;
+					//test_cells[ii] = cell;
+					
+					board.cells[ii] = cell;
+					System.Diagnostics.Debug.WriteLine(board.cells[ii]);
 					ii++;
 
 					cell.SizeMode = PictureBoxSizeMode.StretchImage;
@@ -94,22 +97,22 @@ namespace ChessProject
 			//WindowState = FormWindowState.Maximized;
 			//this.Size = new Size(1300, 1300);
 			InitializeComponent();
-			Cell[] cellArr = new Cell[64];
-			cells = GetBoard(board, cellArr);
+			//Cell[] cellArr = new Cell[64];
+			cells = GetBoard(board);
 			this.Controls.Add(cells);
 
-			startNewGame(board, cellArr);
+			startNewGame(board);
 			newgame_button.Click += (sender, EventArgs) =>
 			{
-				newgame_Click(board, cellArr);
-				drawBoard(board, cellArr);
+				newgame_Click(board);
+				drawBoard(board);
 				printBoard(board);
 			};
 
 			testBoard1Btn.Click += (sender, EventArgs) =>
 			{
-				LoadTestBoard(board, cellArr);
-				drawBoard(board, cellArr);
+				LoadTestBoard(board);
+				drawBoard(board);
 				printBoard(board);
 			};
 			blackAIButton.Click += (sender, EventArgs) =>
@@ -120,7 +123,7 @@ namespace ChessProject
 			{
 				changeCheckValue(board);
 			};
-			drawBoard(board, cellArr);
+			drawBoard(board);
 			printBoard(board);
 
 			test_button.Click += (sender, EventArgs) =>
@@ -133,16 +136,78 @@ namespace ChessProject
 			};
 			loadFENBtn.Click += (sender, EventArgs) =>
 			{
-				LoadFromFEN(board, cellArr);
+				LoadFromFEN(board);
+				PrintToConsolePieces(board);
 			};
 			copyFENBtn.Click += (sender, EventArgs) =>
 			{
 				CopyToClipboard();
 			};
-
-
+			printPieces.Click += (sender, EventArgs) =>
+			{
+				PrintToConsolePieces(board);
+			};
 		}
 
+		void PrintToConsolePieces(Board board)
+        {
+			foreach (List<int> color in board.pawns)
+			{
+				int temp = 0;
+				foreach (int piece in color)
+				{
+					temp++;
+				}
+				System.Diagnostics.Debug.WriteLine("pawns " + board.pawns.IndexOf(color) + ": " + temp);
+			}
+
+			foreach (List<int> color in board.rooks)
+			{
+				int temp = 0;
+				foreach (int piece in color)
+				{
+					temp++;
+				}
+				System.Diagnostics.Debug.WriteLine("rooks " + board.rooks.IndexOf(color) + ": " + temp);
+			}
+
+			foreach (List<int> color in board.queens)
+			{
+				int temp = 0;
+				foreach (int piece in color)
+				{
+					temp++;
+				}
+				System.Diagnostics.Debug.WriteLine("queen " + board.queens.IndexOf(color) + ": " + temp);
+			}
+			foreach (List<int> color in board.kings)
+			{
+				int temp = 0;
+				foreach (int piece in color)
+				{
+					temp++;
+				}
+				System.Diagnostics.Debug.WriteLine("kings " + board.kings.IndexOf(color) + ": " + temp);
+			}
+			foreach (List<int> color in board.knights)
+			{
+				int temp = 0;
+				foreach (int piece in color)
+				{
+					temp++;
+				}
+				System.Diagnostics.Debug.WriteLine("knigh " + board.knights.IndexOf(color) + ": " + temp);
+			}
+			foreach (List<int> color in board.bishops)
+			{
+				int temp = 0;
+				foreach (int piece in color)
+				{
+					temp++;
+				}
+				System.Diagnostics.Debug.WriteLine("bish " + board.bishops.IndexOf(color) + ": " + temp);
+			}
+		}
 		void openTestForm(Board board)
         {
 			var m = new Form4(board);
@@ -150,49 +215,97 @@ namespace ChessProject
         }
 
 
-
-
-
-private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] cells)
+		private void cell_Click(object sender, Board board, TableLayoutPanel b)
 		{
 			//System.Diagnostics.Debug.Write(board.AI_BlackON + " " + board.AI_WhiteON + " " + board.turn);
-			if ((board.AI_WhiteON && board.turn%2 == 0) || (board.AI_BlackON && board.turn%2==1 ))
-            {
-				doAITurn(board, cells);
-            }
+			if ((board.AI_WhiteON && board.turn % 2 == 0) || (board.AI_BlackON && board.turn % 2 == 1))
+			{
+				doAITurn2(board);
+			}
 			Cell targetCell = (Cell)sender;
 
-			if (board.allPossibleMoves != null) { 
+			if (board.allPossibleMovesKV != null)
+			{
 				if (board.selected_cell == -1) // if no cell active selected
 				{
 					if (board.turn % 2 == ChessAI.getCellColor(targetCell.index, board.board)) // if correct color piece clicked on turn set cell as selected
 					{
-						selectCell(board, targetCell, cells);
+						selectCell(board, targetCell.index);
+						drawBoard2(board);
 					}
+					
 				}
+				
 				else
 				{
-					Cell originCell = cells[board.selected_cell];
+					Cell originCell = board.cells[board.selected_cell];
 					if (originCell == targetCell) // if clicked cell same as is active
 					{
-						deselectCell(board, originCell, cells);
+						deselectCell(board);
+						drawBoard2(board);
+						
+					}
+					//else if (board.allPossibleMovesKV.Contains(originCell.index, targetCell.index) && board.allPossibleMoves[originCell.index].Contains(targetCell.index))
 
-					} else if (board.allPossibleMoves[originCell.index] != null && board.allPossibleMoves[originCell.index].Contains(targetCell.index)) 
+					else if (board.allPossibleMovesKV.Contains(new KeyValuePair<int, int>(originCell.index, targetCell.index)))
 					{
-						doTurn(board, cells, originCell, targetCell, false);
+						doTurn2(board, originCell.index, targetCell.index, false);
+						
 						if (board.allPossibleMoves == null)
 						{
 							//System.Diagnostics.Debug.Write("\n ** IT'S A CHECKMATE, MATE ** \n");
 							showCheckmate(board);
 						}
-					} 
+					}
 				}
 
-			} else
-            {
+			}
+			else
+			{
 				//System.Diagnostics.Debug.Write("\n ** IT'S A CHECKMATE, MATE ** \n");
 			}
+			
 		}
+		//private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] cells)
+		//{
+		//	//System.Diagnostics.Debug.Write(board.AI_BlackON + " " + board.AI_WhiteON + " " + board.turn);
+		//	if ((board.AI_WhiteON && board.turn%2 == 0) || (board.AI_BlackON && board.turn%2==1 ))
+		//          {
+		//		doAITurn(board, cells);
+		//          }
+		//	Cell targetCell = (Cell)sender;
+
+		//	if (board.allPossibleMoves != null) { 
+		//		if (board.selected_cell == -1) // if no cell active selected
+		//		{
+		//			if (board.turn % 2 == ChessAI.getCellColor(targetCell.index, board.board)) // if correct color piece clicked on turn set cell as selected
+		//			{
+		//				selectCell(board, targetCell, cells);
+		//			}
+		//		}
+		//		else
+		//		{
+		//			Cell originCell = cells[board.selected_cell];
+		//			if (originCell == targetCell) // if clicked cell same as is active
+		//			{
+		//				deselectCell(board, originCell, cells);
+
+		//			} else if (board.allPossibleMoves[originCell.index] != null && board.allPossibleMoves[originCell.index].Contains(targetCell.index)) 
+		//			{
+		//				doTurn(board, cells, originCell, targetCell, false);
+		//				if (board.allPossibleMoves == null)
+		//				{
+		//					//System.Diagnostics.Debug.Write("\n ** IT'S A CHECKMATE, MATE ** \n");
+		//					showCheckmate(board);
+		//				}
+		//			} 
+		//		}
+
+		//	} else
+		//          {
+		//		//System.Diagnostics.Debug.Write("\n ** IT'S A CHECKMATE, MATE ** \n");
+		//	}
+		//}
 
 		void showCheckmate(Board board)
         {
@@ -202,22 +315,32 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 			wait(5000);
 			m.Close();
         }
-		void selectCell(Board board, Cell cell, Cell[] cells)
+		void setPossibleMoves(Board board, int cell)
         {
-			board.selected_cell = cell.index;
-			requireUpdatedDrawing(cell);
-			board.possibleMoves = board.allPossibleMoves[cell.index];
+			foreach (KeyValuePair<int, int> move in board.allPossibleMovesKV){
+				if (move.Key == cell)
+                {
+					board.possibleMovesList.Add(move.Value);
+                }
+            }
+        }
+		void selectCell(Board board, int cell)
+        {
+			board.selected_cell = cell;
+			//requireUpdatedDrawing(cell);
+			setPossibleMoves(board, cell);
+			board.possibleMoves = board.allPossibleMoves[cell];
 			printArray(board.possibleMoves, printBoxDebug);
-			drawBoard(board, cells);
+			//drawBoard(board);
 		}
 
-		void deselectCell(Board board, Cell cell, Cell[] cells)
+		void deselectCell(Board board)
         {
 			board.selected_cell = -1; // reset selection to none
-			board.possibleMoves = resetPossibleMoves(board, cells);
-			requireUpdatedDrawing(cell);
-			drawBoard(board, cells);
-			printArray(board.possibleMoves, printBoxDebug);
+			board.resetPossibleMoves();
+			//requireUpdatedDrawing(cell);
+			//drawBoard(board);
+			//printArray(board.possibleMoves, printBoxDebug);
 		}
 
 		bool CheckIfKingCastled(int[] board, int originCell, int targetCell)
@@ -233,6 +356,36 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
             }
 			return false;
         }
+		void doTurn2(Board board, int originCell, int targetCell, bool aiTurn)
+		{
+			if (board.allPossibleMovesKV == null)
+			{
+				//System.Diagnostics.Debug.Write("\n ** IT'S A CHECKMATE, MATE ** \n");
+				return;
+			}
+			// update gamestate
+
+			ChessAI.MakeMoveSoft(board, originCell, targetCell);
+		
+			board.selected_cell = -1;
+			ChessAI.checkPawnUpdate(board.board, aiTurn);
+
+			// change turn, draw all and get new moves
+			if (board.turn % 2 == 0) { board.turn += 1; turn_label.Text = "Black"; }
+			else
+			{ board.turn += 1; turn_label.Text = "White"; }
+			board.resetPossibleMoves();
+			board.allPossibleMovesKV = board.allPossibleMovesKV = ChessAI.getAllPossibleMovesLowV2(board, board.turn % 2);
+			System.Diagnostics.Debug.WriteLine(board.allPossibleMovesKV.Count);
+			//board.allPossibleMoves = ChessAI.getAllPossibleMoves(board.board, board.turn % 2);
+			drawBoard2(board);
+			// if ai on for the turné
+			if ((board.turn % 2 == 1 && blackAIButton.Checked) || board.turn % 2 == 0 && whiteAIButton.Checked)
+			{
+				doAITurn2(board);
+			}
+		}
+
 		void doTurn(Board board, Cell[] cells, Cell originCell, Cell targetCell, bool aiTurn) 
         {
 			if (board.allPossibleMoves == null)
@@ -245,7 +398,7 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 			if (CheckIfKingCastled(board.board, originCell.index, targetCell.index))
             {
 				//System.Diagnostics.Debug.Write("castled \n");
-				board.possibleMoves = resetPossibleMoves(board, cells);
+				resetPossibleMoves(board);
 				ChessAI.castleMove(board.board, originCell.index, targetCell.index, cells);
             } else
             {
@@ -269,7 +422,7 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 				}
 				ChessAI.SetupEnpassantPawn(board.board, originCell.index, targetCell.index);
 
-				board.possibleMoves = resetPossibleMoves(board, cells);
+				resetPossibleMoves(board);
 				ChessAI.checkFirstMoveByKingOrRook(board.board, originCell.index);
 				board.board[targetCell.index] = board.board[originCell.index];
 				board.board[originCell.index] = 0;
@@ -287,7 +440,7 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 			{ board.turn += 1; turn_label.Text = "White"; }
 			ChessAI.CancelEnPassant(board.board, board.turn % 2);
 			printBoard(board);
-			drawBoard(board, cells);
+			drawBoard(board);
 			board.allPossibleMoves = ChessAI.getAllPossibleMoves(board.board, board.turn % 2);
 
 			// if ai on for the turné
@@ -313,15 +466,87 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 			}
 		}
 
-		void drawBoard(Board board, Cell[] cells)
+		void doAITurn2(Board board)
+		{
+			int[] result = ChessAI.AITurn(board);
+			wait(10);
+			if (result != null)
+			{
+				doTurn2(board, result[0], result[1], true);
+			}
+			else
+			{
+				//System.Diagnostics.Debug.Write("Debug nulll;");
+			}
+		}
+		void drawBoard2(Board board)
         {
 			for (int i = 0; i < board.board.Length; i++)
             {
-				drawCell(board, cells[i]);
+				drawCell2(board, board.cells[i]);
             }
         }
 
+
+		void drawBoard(Board board)
+		{
+			for (int i = 0; i < board.board.Length; i++)
+			{
+				drawCell(board, board.cells[i]);
+			}
+		}
 		void drawCell(Board board, Cell cell)
+		{
+			int index = cell.index;
+			int cellValue = board.board[index];
+
+
+			if (board.selected_cell == index)
+			{
+				setActiveCellColor(cell);
+			}
+			else if (board.possibleMoves != null && board.possibleMoves.Contains(index))
+			{
+				setLegalCellColor(cell);
+			}
+			else
+			{
+				resetCellColor(cell);
+			}
+			if (!cell.updated)
+			{
+				if (board.board[index] > 0)
+				{
+
+					if (cellValue > 0 && cellValue < 6)
+					{
+						cell.ImageLocation = @"images\1.png";
+
+
+					}
+					else if (cellValue > 10 && cellValue < 16)
+					{
+						cell.ImageLocation = @"images\11.png";
+					}
+					else if (cellValue > 20)
+					{
+						cell.ImageLocation = $@"images\{cellValue - 20}.png";
+					}
+					else
+					{
+						cell.ImageLocation = $@"images\{cellValue}.png";
+
+					}
+				}
+				else
+				{
+					cell.ImageLocation = null;
+				}
+				cell.updated = true;
+			}
+		}
+
+		void drawCell2(Board board, Cell cell)
         {
 			int index = cell.index;
 			int cellValue = board.board[index];
@@ -330,7 +555,7 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 				if (board.selected_cell == index)
                 {
 					setActiveCellColor(cell);
-                } else if (board.possibleMoves != null && board.possibleMoves.Contains(index))
+                } else if (board.possibleMovesList.Count != 0 && board.possibleMovesList.Contains(cell.index))
                 {
 					setLegalCellColor(cell);
                 }		
@@ -338,8 +563,7 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
                 {
 					resetCellColor(cell);
                 }
-			if (!cell.updated)
-			{
+			
 				if (board.board[index] > 0)
                 {
 					
@@ -365,7 +589,7 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 					cell.ImageLocation = null;
                 }
 				cell.updated = true;
-            }
+            
         }
 
 		public void requireUpdatedDrawing (Cell cell)
@@ -419,7 +643,7 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 
 		}
 
-		int[] resetPossibleMoves(Board board, Cell[] cells)
+		void resetPossibleMoves(Board board)
         {
 			int[] moveArray =
 			{
@@ -427,24 +651,9 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 				-1, -1, -1, -1,-1, -1, -1, -1, -1,-1,
 				-1, -1, -1, -1,-1, -1, -1, -1
 			};
-
-			return moveArray;
+			board.possibleMoves = moveArray;
 		}
 
-		int getCellColor(Cell cell, Board board)
-        {
-			int cellContentInt = board.board[cell.index];
-
-			if (cellContentInt > 0 && cellContentInt < 11)
-			{
-				return 0; // white
-			}
-			else if (cellContentInt > 10 && cellContentInt < 21)
-			{
-				return 1; // black
-			}
-			return -1;
-        }
 
 		void printBoard(Board board)
         {
@@ -508,26 +717,27 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 			}
 		}
 
-		void newgame_Click(Board board, Cell[] cells)
+		void newgame_Click(Board board)
 		{
-				startNewGame(board, cells);
+			startNewGame(board);
 		}
 
 
-		void LoadTestBoard(Board board, Cell[] cells)
+		void LoadTestBoard(Board board)
 		{
 
 			board.initializeTestBoard();
-			foreach (Cell cell in cells)
+			foreach (Cell cell in board.cells)
 			{
 				requireUpdatedDrawing(cell);
 			}
 
-			board.allPossibleMoves = ChessAI.getAllPossibleMoves(board.board, 0);
+			//board.allPossibleMoves = ChessAI.getAllPossibleMoves(board.board, 0);
+			board.allPossibleMovesKV = ChessAI.getAllPossibleMovesLowV2(board, 0);
 			blackAIButton.Checked = board.AI_BlackON;
 			whiteAIButton.Checked = board.AI_WhiteON;
 			turn_label.Text = (board.turn % 2 == 0) ? "White" : "Black";
-			drawBoard(board, cells);
+			drawBoard(board);
 			printBoard(board);
 		}
 
@@ -536,32 +746,36 @@ private void cell_Click(object sender, Board board, TableLayoutPanel b, Cell[] c
 			fenDisp.Text = ChessAI.BoardToFEN(board.board, board.turn);
 		}
 
-		void LoadFromFEN(Board board, Cell[] cells)
+		void LoadFromFEN(Board board)
         {
 			if (fenDisp.Text == "") return;
 			ChessAI.FENToBoard(fenDisp.Text, board);
-			SetBoardSettings(board, cells);
+			SetBoardSettings(board);
 		}
-		void SetBoardSettings(Board board, Cell[] cells)
+		void SetBoardSettings(Board board)
         {
 			printBoard(board);
+			Cell[] cells = board.cells;
 			foreach (Cell cell in cells)
 			{
 				requireUpdatedDrawing(cell);
 			}
-			board.allPossibleMoves = ChessAI.getAllPossibleMoves(board.board, 0);
+			//board.allPossibleMoves = ChessAI.getAllPossibleMoves(board.board, 0);
+			board.allPossibleMovesKV = ChessAI.getAllPossibleMovesLowV2(board, 0);
 			blackAIButton.Checked = board.AI_BlackON;
 			whiteAIButton.Checked = board.AI_WhiteON;
 			turn_label.Text = (board.turn % 2 == 0) ? "White" : "Black";
-			drawBoard(board, cells);
+			board.CountPieces();
+			drawBoard(board);
 			printBoard(board);
+
 		}
 
-		void startNewGame(Board board, Cell[] cells)
+		void startNewGame(Board board)
 		{
-
+			
 			board.initializeBoard();
-			SetBoardSettings(board, cells);
+			SetBoardSettings(board);
 		}
 
 		void CopyToClipboard()
