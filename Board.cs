@@ -7,25 +7,57 @@ namespace ChessProject
 	public class Board
 	{
 		public Form1.Cell[] cells;
-		public int[] board;
-		public int selected_cell;
+		public int[] board, oldboard;
+		public int selected_cell, targetCell;
 		public int turn; // 0 white, 1 black
 		public int[] possibleMoves;
 		public int[][] allPossibleMoves;
 		public List<List<int>> pawns, bishops, queens, kings, rooks, knights;
 		public List<List<int>>  whitePieces, blackPieces;
+		public List<KeyValuePair<int, int>> changedSquares, changedSquaresNew;
+		public List<List<int>> backuppawns, backupbishops, backupqueens, backupkings, backuprooks, backupknights;
+		public List<List<int>> backupwhitePieces, backupblackPieces;
+		public List<Move> moveStack;
 		public bool AI_WhiteON, AI_BlackON;
 		public List<KeyValuePair<int, int>> allPossibleMovesKV;
 		public List<int> possibleMovesList;
+		public List<Move> allMoves;
 			//, whiteKingMoved, whiteRookLeftMoved, whiteRookRightMoved,
 			//blackKingMoved, blackRookLeftMoved, blackRookRightMoved;
 		public Board()
 		{
 			cells = new Form1.Cell[64];
 			allPossibleMovesKV = new List<KeyValuePair<int, int>>();
+			List<KeyValuePair<int, int>> changedSquares = new List<KeyValuePair<int, int>>();
 			possibleMovesList = new List<int>();
 			this.initializeBoard();
+			this.targetCell = -1;
+			this.moveStack = new List<Move>();
 		}
+
+		public void BackupBoard()
+        {
+			Array.Copy(board, oldboard, 64);
+			backuppawns = new List<List<int>>(pawns);
+
+		}
+		public void removeOldSquares()
+        {
+			if (changedSquares == null) return;
+			if (changedSquaresNew == null) return;
+			changedSquares.Clear();
+			changedSquaresNew.Clear();
+        }
+		public void addOldSquare(int a, int b)
+        {
+			changedSquares.Add(new KeyValuePair<int, int>(a, b));
+        }
+
+		public void addNewSquare(int a, int b)
+        {
+			changedSquaresNew.Add(new KeyValuePair<int, int>(a, b));
+		}
+
 
 		public void setBoard(int[] board, int turn, int halfmove)
         {

@@ -63,7 +63,7 @@ namespace ChessProject
                     Dictionary<string, Int64> ownPerftResult = new Dictionary<string, Int64>();
                     Stopwatch sw = new Stopwatch();
                     sw.Restart();
-                    Int64 result = ChessAI.MoveGenerationTest(i, board.board, board.turn);
+                    Int64 result = ChessAI.MoveGenerationTest(i, board);
                     ownPerftResult.Add("nodes", result);
                     sw.Stop();
                     ownPerftResult.Add("time", sw.ElapsedMilliseconds);
@@ -73,21 +73,26 @@ namespace ChessProject
                         textBox1.AppendText("Depth: " + i + "  Nodes: " + result + "  Time: " + sw.Elapsed);
                         textBox1.AppendText(Environment.NewLine);
                     }
-                }
 
-                if (compareStockfishBtn.Checked)
-                {
-                    for (int i = 1; i < depth + 1; i++)
+                    if (compareStockfishBtn.Checked)
                     {
                         Dictionary<string, Int64> stockPerftResult = new Dictionary<string, Int64>();
                         callStockfish(ChessAI.BoardToFEN(board.board, board.turn), i, stockPerftResult);
                         stockResults.Add(stockPerftResult);
+                        ComparePerfts(stockResults[i - 1], ownResults[i - 1], 0, i - 1);
                     }
-                    for (int i = 0; i < depth; i++)
-                    {
-                        ComparePerfts(stockResults[i], ownResults[i], 0, i);
-                    }
-                } 
+                }
+
+                //if (compareStockfishBtn.Checked)
+                //{
+                //    for (int i = 1; i < depth + 1; i++)
+                //    {
+                //        Dictionary<string, Int64> stockPerftResult = new Dictionary<string, Int64>();
+                //        callStockfish(ChessAI.BoardToFEN(board.board, board.turn), i, stockPerftResult);
+                //        stockResults.Add(stockPerftResult);
+                //        ComparePerfts(stockResults[i-1], ownResults[i-1], 0, i-1);
+                //    }
+                //} 
             }
             catch
             {

@@ -42,6 +42,7 @@ namespace ChessProject
             this.loadFENBtn = new System.Windows.Forms.Button();
             this.copyFENBtn = new System.Windows.Forms.Button();
             this.printPieces = new System.Windows.Forms.Button();
+            this.undoButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // turn_label
@@ -167,11 +168,21 @@ namespace ChessProject
             this.printPieces.Text = "Pieces";
             this.printPieces.UseVisualStyleBackColor = true;
             // 
+            // undoButton
+            // 
+            this.undoButton.Location = new System.Drawing.Point(866, 819);
+            this.undoButton.Name = "undoButton";
+            this.undoButton.Size = new System.Drawing.Size(94, 29);
+            this.undoButton.TabIndex = 14;
+            this.undoButton.Text = "Undo";
+            this.undoButton.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1123, 1043);
+            this.Controls.Add(this.undoButton);
             this.Controls.Add(this.printPieces);
             this.Controls.Add(this.copyFENBtn);
             this.Controls.Add(this.loadFENBtn);
@@ -207,6 +218,7 @@ namespace ChessProject
         private System.Windows.Forms.Button loadFENBtn;
         private System.Windows.Forms.Button copyFENBtn;
         private System.Windows.Forms.Button printPieces;
+        private System.Windows.Forms.Button undoButton;
     }
 }
 
