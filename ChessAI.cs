@@ -229,7 +229,7 @@ namespace ChessProject
 			int[] board = boardC.board;
 			int turn = maximizingPlayer % 2;
 			int[][] movesList;
-			movesList = getAllPossibleMoves(board, turn);
+			movesList = ChessEngine.GetAllPossibleMoves(board, turn);
 			if (movesList == null)
 			{
 				result[0] = int.MinValue;
@@ -284,7 +284,7 @@ namespace ChessProject
 							else
 							{
 								Array.Copy(board, copyBoard, 64);
-								List<KeyValuePair<int, int>> changed = MakeMoveSoftNew(board, i, movesList[i][j]);
+								List<KeyValuePair<int, int>> changed = ChessEngine.MakeMove(board, i, movesList[i][j], true, -1);
 								int evaluation;
 								if (to != -1)
 								{
@@ -3695,7 +3695,7 @@ namespace ChessProject
 			turn = turn % 2;
 			int[][] movesList;			
 
-			movesList = getAllPossibleMoves(board, turn);
+			movesList = ChessEngine.GetAllPossibleMoves(board, turn);
 			Int64 numPositions = 0;
 			if (movesList != null)
             {
@@ -3703,7 +3703,6 @@ namespace ChessProject
 				{
 					if (movesList[i] != null)
                     {
-						int tempOriginValue = board[i];
 						int tempTemp = 0;
 						for (int j = 0; j < movesList[i].Length; j++)
                         {
@@ -3842,10 +3841,9 @@ namespace ChessProject
 			int[][] movesList;
 			turn = turn % 2;
 
-			List<string> promotionMoves = new List<string>();
 			Stopwatch sw = new Stopwatch();
 			sw.Restart();
-			movesList = getAllPossibleMoves(board, turn);
+			movesList = ChessEngine.GetAllPossibleMoves(board, turn);
 			sw.Stop();
 			if (depth == 3)
             {
@@ -3873,7 +3871,7 @@ namespace ChessProject
 							if ((board[i] == 1 && movesList[i][j] / 8 == 0) || (board[i] == 11 && movesList[i][j] / 8 == 7))
 							{
 								Array.Copy(board, copyBoard, 64);
-								MakeMoveSoft(board, i, movesList[i][j], tempTemp);
+								ChessEngine.MakeMovePawnPromotion(board, i, movesList[i][j], tempTemp);
 								tempTemp++;
 								Int64 tempCount = MoveGenerationTestDivide(depth - 1, board, (turn + 1) % 2, originalDepth, perftResults);
 								numPositions += tempCount;
@@ -3884,12 +3882,12 @@ namespace ChessProject
 							else
 							{
 								//System.Diagnostics.Debug.WriteLine(i + " " + movesList[i][j] );
-								List<KeyValuePair<int, int>> changed = MakeMoveSoftNew(board, i, movesList[i][j]);
+								List<KeyValuePair<int, int>> changed = ChessEngine.MakeMove(board, i, movesList[i][j], true, -1);
 					
 								Int64 tempCount = MoveGenerationTest(depth - 1, board, (turn + 1) % 2);
 								numPositions += tempCount;
 								//UnmakeMoveSoft(board, i, movesList[i][j], tempTargetValue, tempOriginValue);
-								UnMakeSoftNew(board, changed);
+								ChessEngine.UnMakeMove(board, changed);
 								//Array.Copy(copyBoard, board, 64);
 								subcount += tempCount;
 							}
@@ -3903,20 +3901,21 @@ namespace ChessProject
                                 string str = ReturnAlphabeticalCoordinate(i) + ReturnAlphabeticalCoordinate(movesList[i][j]);
                                 if (perftResults.ContainsKey(str))
                                 {
-                                    
+									
 
 
-                                    if (!perftResults.ContainsKey(str + "r"))
+
+									if (!perftResults.ContainsKey(str + "r"))
                                     {
                                         perftResults.Add(str + "r", subcount);
-                                    }
-                                    else if (!perftResults.ContainsKey(str + "b"))
-                                    {
-                                        perftResults.Add(str + "b", subcount);
                                     }
                                     else if (!perftResults.ContainsKey(str + "n"))
                                     {
                                         perftResults.Add(str + "n", subcount);
+                                    }
+                                    else if (!perftResults.ContainsKey(str + "b"))
+                                    {
+                                        perftResults.Add(str + "b", subcount);
 										perftResults.Add(str + "q", perftResults[str]);
 										perftResults.Remove(str);
                                     }

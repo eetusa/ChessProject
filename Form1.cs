@@ -326,28 +326,57 @@ namespace ChessProject
 			m.Show();
         }
 
+		public void DoTurn(Board board, int originCell, int targetCell, bool aiTurn, int promotion)
+		{
+			//if (board.allPossibleMoves == null) return;
+			ChessEngine.MakeMove(board.board, originCell, targetCell, aiTurn, promotion);
+			board.turn++;
+			board.selected_cell = -1;
+			board.resetPossibleMoves();
+			drawBoard2(board);
+			board.allPossibleMoves = ChessEngine.GetAllPossibleMoves(board.board, board.turn % 2);
+			if (board.allPossibleMoves == null)
+			{
+				showCheckmate(board);
+				return;
+			}
+
+			if ((board.turn % 2 == 1 && blackAIButton.Checked) || board.turn % 2 == 0 && whiteAIButton.Checked)
+			{
+				DoAITurn(board);
+			}
+
+		}
+
+		void DoAITurn(Board board)
+		{
+			int[] result = ChessAI.AITurn(board);
+			wait(10);
+			if (result != null)
+			{
+				DoTurn(board, result[0], result[1], true, result[2]); //
+			}
+		}
 
 		private void cell_Click(object sender, Board board, TableLayoutPanel b)
 		{
-			//System.Diagnostics.Debug.Write(board.AI_BlackON + " " + board.AI_WhiteON + " " + board.turn);
 			if ((board.AI_WhiteON && board.turn % 2 == 0) || (board.AI_BlackON && board.turn % 2 == 1))
 			{
-				doAITurn4(board);
+				DoAITurn(board);
 			}
 			Cell targetCell = (Cell)sender;
-			ChessEngine.GetPossibleMovesCaller(board.board, targetCell.index, board.turn%2);
-			if (board.allPossibleMovesKV != null)
+			//ChessEngine.GetPossibleMovesCaller(board.board, targetCell.index, board.turn%2);
+			if (board.allPossibleMoves != null)
 			{
 				if (board.selected_cell == -1) // if no cell active selected
 				{
-					if (board.turn % 2 == ChessAI.getCellColor(targetCell.index, board.board)) // if correct color piece clicked on turn set cell as selected
+					if (board.turn % 2 == ChessEngine.getCellColor(targetCell.index, board.board)) // if correct color piece clicked on turn set cell as selected
 					{
 						selectCell(board, targetCell.index);
+						//System.Diagnostics.Debug.WriteLine("moves amount: " + board.possibleMoves.Length);
 						drawBoard2(board);
 					}
-					
 				}
-				
 				else
 				{
 					Cell originCell = board.cells[board.selected_cell];
@@ -357,33 +386,16 @@ namespace ChessProject
 						drawBoard2(board);
 						return;
 					}
-
-                    //foreach (Move move in board.allMoves)
-                    //               {
-                    //	if (move.from == originCell.index && move.to == targetCell.index)
-                    //                   {
-                    //		doTurn3(board, move, false);
-                    //		return;
-                    //                   }
-                    //               }
-
-
                     if (board.allPossibleMoves == null)
                     {
-                        //System.Diagnostics.Debug.Write("\n ** IT'S A CHECKMATE, MATE ** \n");
                         showCheckmate(board);
                     }
-
-                    //else if (board.allPossibleMovesKV.Contains(originCell.index, targetCell.index) && board.allPossibleMoves[originCell.index].Contains(targetCell.index))
-                        //if move is from legal list 5.3.2021
-
-                    else if (board.allPossibleMovesKV.Contains(new KeyValuePair<int, int>(originCell.index, targetCell.index)))
+                    else if (board.allPossibleMoves[originCell.index] != null &&board.allPossibleMoves[originCell.index].Contains(targetCell.index))
                     {
-                        doTurn4(board, originCell.index, targetCell.index, false);
+                        DoTurn(board, originCell.index, targetCell.index, false, -1);
 
                         if (board.allPossibleMoves == null)
                         {
-                            //System.Diagnostics.Debug.Write("\n ** IT'S A CHECKMATE, MATE ** \n");
                             showCheckmate(board);
                         }
                     }
@@ -447,13 +459,14 @@ namespace ChessProject
         }
 		void setPossibleMoves(Board board, int cell)
         {
-            foreach (KeyValuePair<int, int> move in board.allPossibleMovesKV)
-            {
-                if (move.Key == cell)
-                {
-                    board.possibleMovesList.Add(move.Value);
-                }
-            }
+			//foreach (KeyValuePair<int, int> move in board.allPossibleMovesKV)
+			//{
+			//    if (move.Key == cell)
+			//    {
+			//        board.possibleMovesList.Add(move.Value);
+			//    }
+			//}
+			board.possibleMoves = board.allPossibleMoves[cell];
 
    //         foreach (Move move in board.allMoves)
    //         {
@@ -468,7 +481,7 @@ namespace ChessProject
         {
 			board.selected_cell = cell;
 			//requireUpdatedDrawing(cell);
-			setPossibleMoves(board, cell);
+			//setPossibleMoves(board, cell);
 			board.possibleMoves = board.allPossibleMoves[cell];
 			printArray(board.possibleMoves, printBoxDebug);
 			//drawBoard(board);
@@ -588,11 +601,11 @@ namespace ChessProject
 			}
 		}
 
+
 		void doTurn(Board board, Cell[] cells, Cell originCell, Cell targetCell, bool aiTurn) 
         {
 			if (board.allPossibleMoves == null)
 			{
-				//System.Diagnostics.Debug.Write("\n ** IT'S A CHECKMATE, MATE ** \n");
 				return;
 			}
 			// update gamestate
@@ -790,7 +803,7 @@ namespace ChessProject
 				if (board.selected_cell == index)
                 {
 					setActiveCellColor(cell);
-                } else if (board.possibleMovesList.Count != 0 && board.possibleMovesList.Contains(cell.index))
+                } else if (board.possibleMoves != null && board.possibleMoves.Contains(cell.index))
                 {
 					setLegalCellColor(cell);
                 }		
@@ -965,11 +978,11 @@ namespace ChessProject
 			foreach (Cell cell in board.cells)
 			{
 				requireUpdatedDrawing(cell);
-			}
+			};
 
-            //board.allPossibleMoves = ChessAI.getAllPossibleMoves(board.board, 0);
-			board.allPossibleMovesKV = ChessAI.getAllPossibleMovesLowV2(board, board.turn % 2);
-			//board.allMoves = ChessAI.getAllPossibleMovesNew(board, 0);
+			//board.allPossibleMoves = ChessAI.getAllPossibleMoves(board.board, 0);
+			//board.allPossibleMovesKV = ChessAI.getAllPossibleMovesLowV2(board, board.turn % 2);
+		    board.allPossibleMoves = ChessEngine.GetAllPossibleMoves(board.board, board.turn % 2);
 			blackAIButton.Checked = board.AI_BlackON;
 			whiteAIButton.Checked = board.AI_WhiteON;
 			turn_label.Text = (board.turn % 2 == 0) ? "White" : "Black";
@@ -996,9 +1009,10 @@ namespace ChessProject
 			{
 				requireUpdatedDrawing(cell);
 			}
-            //board.allPossibleMoves = ChessAI.getAllPossibleMoves(board.board, 0);
-            board.allPossibleMovesKV = ChessAI.getAllPossibleMovesLowV2(board, 0);
-            //board.allMoves = ChessAI.getAllPossibleMovesNew(board, board.turn%2);
+			//board.allPossibleMoves = ChessAI.getAllPossibleMoves(board.board, 0);
+			//board.allPossibleMovesKV = ChessAI.getAllPossibleMovesLowV2(board, 0);
+			//board.allMoves = ChessAI.getAllPossibleMovesNew(board, board.turn%2);
+			board.allPossibleMoves = ChessEngine.GetAllPossibleMoves(board.board, board.turn % 2);
 			blackAIButton.Checked = board.AI_BlackON;
 			whiteAIButton.Checked = board.AI_WhiteON;
 			turn_label.Text = (board.turn % 2 == 0) ? "White" : "Black";

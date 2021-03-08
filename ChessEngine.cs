@@ -6,6 +6,10 @@ namespace ChessProject
 {
     public static class ChessEngine
     {
+
+
+
+
         static bool IsKingThreatened(int[] board, int from, int to, int color)
         {
             // make potential board from potential move
@@ -52,7 +56,6 @@ namespace ChessProject
 
             return false;
         }
-
         static bool IsCapturingMove(int[] board, int pieceIndex, int targetIndex)
         {
             int piece = board[pieceIndex];
@@ -80,25 +83,25 @@ namespace ChessProject
                 {
                     if (movement == 7 || movement == 9) return true;
                 }
-            } else if (piece == 6 || piece == 16) // rook
+            } else if (piece == 6 || piece == 16) // bishop
             {
-                if (movement % 7 == 0 || movement % 9 == 0)
+                if (rowdif * 7 == movement || rowdif * 9 == movement)
                 {
                     return CheckStraightMovement(board, pieceIndex, targetIndex, movement, rowdif);
                 }
             } else if ( piece == 7 || piece == 17) // knight
             {
-                if ((movement == -17 || movement == -15 || movement == 17 || movement == 15) && rowdif == 2)
+                if ((movement == -17 || movement == -15 || movement == 17 || movement == 15) && (rowdif == 2 || rowdif == -2))
                 {
                     return true;
                 }
-                else if ((movement == -6 || movement == -10 || movement == 6 || movement == 10) && rowdif == 1)
+                else if ((movement == -6 || movement == -10 || movement == 6 || movement == 10) && (rowdif == 1 || rowdif == -1))
                 {
                     return true;
                 }
             } else if ( piece == 9 || piece == 19) // queen
             {
-                if (movement % 7 == 0 || movement % 9 == 0 || movement % 8 == 0 || (movement > -8 && movement <8))
+                if (rowdif * 7 == movement || rowdif * 9 == movement || rowdif * 8 == movement || (movement > -8 && movement <8))
                 {
                     return CheckStraightMovement(board, pieceIndex, targetIndex, movement, rowdif);
                 }
@@ -106,7 +109,7 @@ namespace ChessProject
             {
                 if (rowdif != 0)
                 {
-                    if (movement % 8 == 0)
+                    if (rowdif * 8 == movement)
                     {
                         return CheckStraightMovement (board, pieceIndex, targetIndex, movement, rowdif);
                     }
@@ -119,20 +122,28 @@ namespace ChessProject
 
             return false;
         }
-
         static bool CheckStraightMovement(int[] board, int origin, int target, int movement, int rowdif)
         {
-            
+            //if (board[origin] == 16)
+            //{
+            //    System.Diagnostics.Debug.WriteLine("// 1: " + origin + " " + target + " " + movement + " " + rowdif);
+            //}
             int row_diff = Math.Abs(rowdif);
             if (row_diff > 0)
             {
-                if (movement % 7 == 0)
+                if (7 * rowdif == movement)
                 {
                     movement = movement > 0 ? 7 : -7;
                 }
-                else if (movement % 9 == 0)
+                else if (9 * rowdif == movement)
                 {
                     movement = movement > 0 ? 9 : -9;
+                } else if (8 * rowdif == movement)
+                {
+                    movement = movement > 0 ? 8 : -8;
+                } else
+                {
+                    return false;
                 }
             } else
             {
@@ -145,9 +156,13 @@ namespace ChessProject
                 }
             }
 
+
             if (rowdif!=0 && (movement == 1 || movement == -1)) return false;
             if ((rowdif==0) && (movement > 1 || movement < -1)) return false;
-            
+            //if (board[origin] == 16)
+            //{
+            //    System.Diagnostics.Debug.WriteLine("// 2: " + origin + " " + target + " " + movement + " " + rowdif);
+            //}
 
 
 
@@ -252,9 +267,9 @@ namespace ChessProject
                     }
                 }
             }
-            if ( ( (color == 0 && index / 8 == 6) || (color == 1 && index / 8 == 1) ) && running == 1)
+            if ( ( (color == 0 && index / 8 == 6) || (color == 1 && index / 8 == 1) ))
             {
-                if (board[index + direction * 16] == 0)
+                if (board[index + direction * 16] == 0 && board[index + direction * 8] == 0)
                 {
                     if (!IsKingThreatened(board, index, index + direction * 16, color))
                     {
@@ -333,7 +348,6 @@ namespace ChessProject
 
 
         }
-
         static int[] GetMovesBishop(int[] board, int index, int color)
         {
             int[] movement = { -9, -7, 7, 9 };
@@ -410,7 +424,6 @@ namespace ChessProject
             return GetStraightMovement(board, index, color, movement, moves);
             //return null;
         }
-
         static int[] GetMovesKing(int[] board, int index, int color)
         {
             int[] movement = { 1, -1, 8, -8, 7, -7, 9, -9 };
@@ -458,6 +471,36 @@ namespace ChessProject
                 }
 
             }
+
+            // move = 2;
+            if ( ((board[index] == 30 && board[index + 3] == 28) || (board[index] == 40 && board[index + 3] == 38)) && board[index+1]==0 && board[index+2] == 0)
+            {
+                bool add = true;
+                for (int i = 0; i < 3; i++)
+                {
+                    if (IsKingThreatened(board, index, index + i, color)) add = false;
+                }
+                if (add)
+                {
+                    moves[running] = index + 2;
+                    running++;
+                }
+            }
+
+            if (((board[index] == 30 && board[index - 4] == 28) || (board[index] == 40 && board[index - 4] == 38)) && board[index - 1] == 0 && board[index - 2] == 0 && board[index - 3] == 0)
+            {
+                bool add = true;
+                for (int i = 0; i < 3; i++)
+                {
+                    if (IsKingThreatened(board, index, index - i, color)) add = false;
+                }
+                if (add)
+                {
+                    moves[running] = index - 2;
+                    running++;
+                }
+            }
+
             return moves;
         }
         static int[] GetStraightMovement(int[] board, int index, int color, int[] movement, int[] moves)
@@ -468,6 +511,7 @@ namespace ChessProject
                 int moveConst = movement[i];
                 int move = movement[i];
                 int initialRowDif = index / 8 - (index + move) / 8;
+                if (initialRowDif > 1 || initialRowDif < -1) continue;
                 if ( ( (move == 1 || move == -1) && initialRowDif == 0) || (( move > 1 || move < -1 ) && initialRowDif != 0))
                 {
                     
@@ -479,9 +523,12 @@ namespace ChessProject
                         bool emptySquare = GetCellColor(board[index + move]) == -1;
                         if (okSquare)
                         {
-                            if (IsKingThreatened(board, index, index + move, color)) break;
-                            moves[movesIndex] = index + move;
-                            movesIndex++;
+                            if (!IsKingThreatened(board, index, index + move, color))
+                            {
+                                moves[movesIndex] = index + move;
+                                movesIndex++;
+                            }
+                            
                             if ((index + move)/8 - (index + move + moveConst)/8 != initialRowDif) break;
                             if (!emptySquare) break;
                             move += moveConst;
@@ -523,42 +570,32 @@ namespace ChessProject
                 result = GetMovesKing(board, index, color);
             }
 
-            System.Diagnostics.Debug.WriteLine("--------");
-            for (int i = 0; i < result.Length; i++)
-            {
-                if (result[i] != -1)
-                {
-                    System.Diagnostics.Debug.WriteLine("Possible move: " + result[i]);
-                }
-            }
-            return null;
+            return result;
         }
-        public static int[][] getAllPossibleMoves(int[] board, int color)
+        public static int[][] GetAllPossibleMoves(int[] board, int color)
         {
 
             int[][] superArray = new int[64][];
-            int[] tempArray = new int[28];
-            bool empty = true;
+            int running = 0;
 
             for (int i = 0; i < superArray.Length; i++)
             {
+                running++;
                 int gotColor = getCellColor(i, board);
                 if (gotColor == color)
                 {
-                    //tempArray = getPossibleMovesLow(board, i);
-                    if (tempArray[0] != -1)
+                    superArray[i] = GetPossibleMovesCaller(board, i, color);
+                    if ( superArray[i][0] == -1)
                     {
-                        superArray[i] = new int[28];
-                        Array.Copy(tempArray, superArray[i], 28);
-                        empty = false;
+                        running--;
+                        superArray[i] = null;
                     }
 
                 }
             }
-            if (!empty) return superArray;
+            if (running > 0) return superArray;
             else return null;
         }
-
         public static int getCellColor(int cellIndex, int[] board)
         {
             int cellContentInt = board[cellIndex];
@@ -586,16 +623,14 @@ namespace ChessProject
             }
             return -1;
         }
-
-        static void UnMakeSoftNew(int[] board, List<KeyValuePair<int, int>> changed)
+        public static void UnMakeMove(int[] board, List<KeyValuePair<int, int>> changed)
         {
             foreach (KeyValuePair<int, int> change in changed)
             {
                 board[change.Key] = change.Value;
             }
         }
-
-        public static List<KeyValuePair<int, int>> MakeMoveSoftNew(int[] board, int originCell, int targetCell)
+        public static List<KeyValuePair<int, int>> MakeMove(int[] board, int originCell, int targetCell, bool aiTurn, int promotion)
         {
             List<KeyValuePair<int, int>> changed = new List<KeyValuePair<int, int>>();
             int movement = (originCell - targetCell);
@@ -632,10 +667,127 @@ namespace ChessProject
 
                 board[targetCell] = board[originCell];
                 board[originCell] = 0;
+
+                if ((board[targetCell] == 1 && targetCell/8==0) || (board[targetCell] == 1 && targetCell / 8 == 7))
+                {
+                    CheckPawnUpdatePromotion(board, targetCell, aiTurn, promotion);
+                }
+                
             }
             return changed;
         }
 
+        public static void CheckPawnUpdatePromotion(int[] board, int index, bool aiTurn, int promotion)
+        {
+            int add = GetCellColor(board[index]) == 0 ? 0 : 10;
+            if (!aiTurn)
+            {
+                using (Form3 form = new Form3())
+                {
+
+                    var result = form.ShowDialog();
+                    if (result == System.Windows.Forms.DialogResult.OK)
+                    {
+                        int returnValue = form.returnValue;            //values preserved after close
+                        if (returnValue == 6)
+                        {
+                            board[index] = 6 + add;
+
+                        }
+                        if (returnValue == 7)
+                        {
+                            board[index] = 7 + add;
+                        }
+                        if (returnValue == 8)
+                        {
+                            board[index] = 8;
+                        }
+                        if (returnValue == 9 + add)
+                        {
+                            board[index] = 9 + add;
+                        }
+
+                    }
+                }
+            }
+            else
+            {
+                board[index] = 9 + add - promotion;
+            }
+
+        }
+        public static void MakeMovePawnPromotion(int[] board, int originCell, int targetCell, int promotion)
+        {
+
+            CancelEnPassantSimple(board);
+            if (originCell / 8 == 1)
+            {
+                if (promotion % 4 == 0)
+                {
+                    board[targetCell] = 9;
+                }
+                else if (promotion % 4 == 1)
+                {
+                    board[targetCell] = 8;
+                }
+                else if (promotion % 4 == 2)
+                {
+                    board[targetCell] = 7;
+                }
+                else if (promotion % 4 == 3)
+                {
+                    board[targetCell] = 6;
+                }
+            }
+            else if (originCell / 8 == 6)
+            {
+                if (promotion % 4 == 0)
+                {
+                    board[targetCell] = 19;
+                }
+                else if (promotion % 4 == 1)
+                {
+                    board[targetCell] = 18;
+                }
+                else if (promotion % 4 == 2)
+                {
+                    board[targetCell] = 17;
+                }
+                else if (promotion % 4 == 3)
+                {
+                    board[targetCell] = 16;
+                }
+            }
+            else
+            {
+                board[targetCell] = board[originCell];
+
+            }
+            board[originCell] = 0;
+
+
+        }
+        public static void CancelEnPassantSimple(int[] board)
+        {
+            for (int i = 24; i < 32; i++)
+            {
+                if (board[i] == 12)
+                {
+                    board[i] = 11;
+                    return;
+                }
+            }
+
+            for (int j = 32; j < 40; j++)
+            {
+                if (board[j] == 2)
+                {
+                    board[j] = 1;
+                    return;
+                }
+            }
+
+        }
         public static void CancelEnPassantReturn(int[] board, List<KeyValuePair<int, int>> changed)
         {
             for (int i = 24; i < 32; i++)
@@ -659,7 +811,6 @@ namespace ChessProject
             }
 
         }
-
         public static void CastleMoveSoftNew(int[] board, int originCell, int targetCell, List<KeyValuePair<int, int>> changed)
         {
 
@@ -690,7 +841,6 @@ namespace ChessProject
 
             }
         }
-
         public static bool SetupEnpassantPawnNew(int[] board, int originCell, int targetCell, List<KeyValuePair<int, int>> changed)
         {
             if ((originCell / 8 == 1 && targetCell / 8 == 3) || (originCell / 8 == 6 && targetCell / 8 == 4))
@@ -700,7 +850,6 @@ namespace ChessProject
             }
             return false;
         }
-
         public static void CheckFirstMoveByKingOrRookNew(int[] board, int originCell, List<KeyValuePair<int, int>> changed)
         {
             if (board[originCell] == 28 || board[originCell] == 30 || board[originCell] == 38 || board[originCell] == 40)

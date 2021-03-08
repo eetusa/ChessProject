@@ -130,6 +130,7 @@ namespace ChessProject
                     if (!result.ContainsKey(entry.Key) && entry.Key!="time")
                     {
                         ComparisonDisplay.AppendText(entry.Key + " not found in comparison results");
+                        ComparisonDisplay.AppendText(Environment.NewLine);
                     }
                 }
 

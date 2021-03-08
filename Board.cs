@@ -78,7 +78,7 @@ namespace ChessProject
 				-1, -1, -1, -1,-1, -1, -1, -1, -1,-1,
 				-1, -1, -1, -1,-1, -1, -1, -1
 			};
-			if (possibleMovesList != null) possibleMovesList.Clear();
+			//if (possibleMovesList != null) possibleMovesList.Clear();
 		}
 
 		private void InitializePieceLists()
